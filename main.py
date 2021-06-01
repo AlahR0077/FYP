@@ -61,7 +61,9 @@ from datetime import datetime
 
 # Import GUI and Modules and Widgets
 # ///////////////////////////////////////////////////////////////
-from PySide6 import QtGui
+import PySide6
+from PySide6 import QtGui, QtCore
+
 from modules import *
 from widgets import *
 
@@ -384,7 +386,7 @@ class MainWindow(QMainWindow):
             UIFunctions.theme(self, themeFile, True)
 
             # SET HACKS
-            AppFunctions.setThemeHack(self)
+            self.setThemeHack(self)
 
         # SET First PAGE AND SELECT MENU
         # ///////////////////////////////////////////////////////////////
@@ -392,10 +394,93 @@ class MainWindow(QMainWindow):
         loggedIn = False
         widgets.stackedWidget_5.setCurrentWidget(widgets.login_page)
 
+        print(type(self.cpu_percent))
+        print(type(self.timestamp))
    #  Function for Live Dataset Search
    # ///////////////////////////////////////////////////////////////
     def getSearch(self):
-        AppFunctions.dataset_search_activate(self,widgets)
+        Datasets.dataset_search_activate(self,widgets)
+
+    # Function for Theme Settings
+    # ///////////////////////////////////////////////////////////////
+    def setThemeHack(self):
+        Settings.BTN_LEFT_BOX_COLOR = "background-color: #495474;"
+        Settings.BTN_RIGHT_BOX_COLOR = "background-color: #495474;"
+        Settings.MENU_SELECTED_STYLESHEET = MENU_SELECTED_STYLESHEET = """
+        border-left: 22px solid qlineargradient(spread:pad, x1:0.034, y1:0, x2:0.216, y2:0, stop:0.499 rgba(255, 121, 198, 255), stop:0.5 rgba(85, 170, 255, 0));
+        background-color: #566388;
+        """
+        # SET MANUAL STYLES
+        self.ui.lineEdit.setStyleSheet("background-color: #6272a4;")
+        self.ui.pushButton.setStyleSheet("background-color: #6272a4;")
+        self.ui.plainTextEdit.setStyleSheet("background-color: #6272a4;")
+        self.ui.tableWidget.setStyleSheet(
+            "QScrollBar:vertical { background: #6272a4; } QScrollBar:horizontal { background: #6272a4; }")
+        self.ui.scrollArea.setStyleSheet(
+            "QScrollBar:vertical { background: #6272a4; } QScrollBar:horizontal { background: #6272a4; }")
+        self.ui.comboBox.setStyleSheet("background-color: #6272a4;")
+        self.ui.horizontalScrollBar.setStyleSheet("background-color: #6272a4;")
+        self.ui.verticalScrollBar.setStyleSheet("background-color: #6272a4;")
+        self.ui.commandLinkButton.setStyleSheet("color: #ff79c6;")
+
+    # Function for the Conversion of Picture Data to Bytes for the Database Storage Purpose
+    # ///////////////////////////////////////////////////////////////
+    def convert_pixmap_to_bytes(self, pixmap):
+        ba = QtCore.QByteArray()
+        buff = QtCore.QBuffer(ba)
+        buff.open(QtCore.QIODevice.WriteOnly)
+        ok = pixmap.save(buff, "PNG")
+        assert ok
+        pixmap_bytes = ba.data()
+        print(type(pixmap_bytes))
+        #  return converted data in bytes form
+        return pixmap_bytes
+
+    # Function for the Conversion of Bytes Data of Pictures to Pixmaps for the UI View Purpose
+    # ///////////////////////////////////////////////////////////////
+    def convert_bytes_to_pixmap(self, pixmap_bytes):
+        # If no data is given, show default App Logo
+        if pixmap_bytes == "":
+            return "./images/images/LogoW.png"
+
+        # Using QByteArray
+        ba = QtCore.QByteArray(pixmap_bytes)
+        pixmap = QtGui.QPixmap()
+        ok = pixmap.loadFromData(ba, "PNG")
+        assert ok
+        print(type(pixmap))
+        #  return converted data in pixmap form
+        return pixmap
+
+    # Function for getting a JPG or PNG file from the disk and Converting to pixmap data
+    # ///////////////////////////////////////////////////////////////
+    def getImage(self):
+        # getting png or jpg files from the disk
+        fname = QFileDialog.getOpenFileName(self, 'Open file',
+                                            'c:\\', "Image files (*.jpg *.png)")
+        imagePath = fname[0]
+        # converting file data to pixmap
+        pixmap = QPixmap(imagePath)
+        # returning image as a pixmap
+        return pixmap
+
+    # Function to Open the Output Image in the CV2 viewer
+    # ///////////////////////////////////////////////////////////////
+    def open_image(self, image):
+        # getting image size
+        size = image.size()
+        # getting image width
+        h = size.width()
+        # getting image height
+        w = size.height()
+        # Get the QImage Item and convert it to a byte string
+        qimg = image.toImage()
+        byte_str = qimg.bits().tobytes()
+        # Using the np.frombuffer function to convert the byte string into an np array
+        img = np.frombuffer(byte_str, dtype=np.uint8).reshape((w, h, 4))
+        # Opening image in the cv2 image viewer
+        cv2.imshow('image', img)
+        return
 
     #  Function for CPU/RAM Percentage Show
     # ///////////////////////////////////////////////////////////////
@@ -626,7 +711,7 @@ class MainWindow(QMainWindow):
             # getting the entered user password form the login form
             password = widgets.user_password.text()
             # calling the login function to validate the login request
-            validate_login = AppFunctions.login(self,username,password)
+            validate_login = User_Profile.login(self,username,password)
             # if the login success message is returned
             if validate_login == "Logged successfully":
                 # prompt the successful login notification
@@ -647,7 +732,7 @@ class MainWindow(QMainWindow):
             # getting the entered user email from the form
             user_email = widgets.recovery_email.text()
             # calling the function to find the user by email in the database
-            user = AppFunctions.find_user_by_email(self, user_email)
+            user = User_Profile.find_user_by_email(self, user_email)
             # if the user not exists in the database
             if user == "The user doesn't exists!":
                 # prompting the error => email not registered
@@ -671,7 +756,7 @@ class MainWindow(QMainWindow):
                 # if the 'NewPassword' title not found
                 else:
                     # updating the user 'Applied for Forgotten Password or User Name' activity in the database
-                    AppFunctions.update_recent_activity(self, user["name"], 'Applied for Forgotten Password or User Name', 'High',widgets)
+                    User_Profile.update_recent_activity(self, user["name"], 'Applied for Forgotten Password or User Name', 'High',widgets)
                     # prompt the recovery message notification on the app display
                     widgets.recovery_message_widget.raise_()
 
@@ -685,7 +770,7 @@ class MainWindow(QMainWindow):
             # getting the user email from the from the recovery email widget
             user_email = widgets.recovery_email.text()
             # calling the function to send the user details to the user by email
-            AppFunctions.send_user_details_to_email(self, user_email)
+            User_Profile.send_user_details_to_email(self, user_email)
             # remove the recovery message notification from the app display
             widgets.recovery_message_widget.lower()
 
@@ -704,7 +789,7 @@ class MainWindow(QMainWindow):
             # getting the email title
             confirm_mail.title
             # calling the function to update the new user password in the database
-            validate_new_password = AppFunctions.update_new_password(self, new_password, confirm_new_password, confirm_mail.from_addr)
+            validate_new_password = User_Profile.update_new_password(self, new_password, confirm_new_password, confirm_mail.from_addr)
             # if the wrong new password pattern followed message is returned
             if validate_new_password == "Password Search Unsuccessful":
                 # prompt the password error on the app display
@@ -727,7 +812,7 @@ class MainWindow(QMainWindow):
                 # removing the new password widget from the app display
                 widgets.new_password_widget.lower()
                 # updating the user 'New User Credentials Set' activity in the database
-                AppFunctions.update_recent_activity(self, widgets.new_uname.text(), 'New User Credentials Set','High',widgets)
+                User_Profile.update_recent_activity(self, widgets.new_uname.text(), 'New User Credentials Set','High',widgets)
 
         # new password message cancel button
         if btnName == "new_password_widget_cancel_btn":
@@ -750,17 +835,17 @@ class MainWindow(QMainWindow):
             username = widgets.user_name.text()
 
             # finding the user by the user email
-            user = AppFunctions.find_user_by_name(self,username);
+            user = User_Profile.find_user_by_name(self,username);
             # calling the function to load user favourite items stored in the database to display
-            AppFunctions.load_myfavourites(self, widgets.user_name.text(), widgets)
+            User_Profile.load_myfavourites(self, widgets.user_name.text(), widgets)
             # calling the function to load user activity stored in the database to display
-            AppFunctions.load_recent_activity(self, widgets.user_name.text(), widgets)
+            User_Profile.load_recent_activity(self, widgets.user_name.text(), widgets)
             # updating the user 'Logged in Successfully' activity in the database
-            AppFunctions.update_recent_activity(self, user["name"],'Logged in Successfully', 'High',widgets)
+            User_Profile.update_recent_activity(self, user["name"],'Logged in Successfully', 'High',widgets)
             # getting the user profile_pic data stored in the database
             image = user["profile_pic"]
             # converting the profile image data from bytes to pixmap for display purpose
-            pixmap = AppFunctions.convert_bytes_to_pixmap(self,image)
+            pixmap = self.convert_bytes_to_pixmap(image)
             # displaying the profile image on the profile pic widget
             widgets.profile_view_pic.setPixmap(pixmap)
             # setting the name label with the specified user name
@@ -799,7 +884,7 @@ class MainWindow(QMainWindow):
         # signup_profile-pic upload btn
         if btnName == "upload_profile_pic_btn":
             # calling a function to upload the profile picture and store it on the database
-            widgets.profile_image.setPixmap(QPixmap(AppFunctions.getImage(self)))
+            widgets.profile_image.setPixmap(QPixmap(self.getImage()))
             # resizing the profile image for better display
             widgets.profile_image.resize(70, 70)
 
@@ -816,7 +901,7 @@ class MainWindow(QMainWindow):
             # getting the uploaded user profile picture form the signup form
             profile_image = widgets.profile_image.pixmap()
             # calling a function to validate the signup form
-            validate_signup = AppFunctions.register(self, username, email, password, confirm_password,profile_image)
+            validate_signup = User_Profile.register(self, username, email, password, confirm_password,profile_image)
             # if the registration success message is returned
             if validate_signup == "Registered successfully":
                 # prompt the user credentials to remember on the app display
@@ -835,7 +920,7 @@ class MainWindow(QMainWindow):
                 # removing the password_confirm_error message  from the app display
                 widgets.password_confirm_error.lower()
                 # updating the user 'Registered Successfully' activity in the database
-                AppFunctions.update_recent_activity(self, username, 'Registered Successfully', 'High',widgets)
+                User_Profile.update_recent_activity(self, username, 'Registered Successfully', 'High',widgets)
                 # printing the registration success message on the console
                 print('Registered successfully')
 
@@ -938,7 +1023,7 @@ class MainWindow(QMainWindow):
                 # getting the user name from the name label
                 username = widgets.user_name.text()
                 # calling the function to find the user by user name in the database
-                user = AppFunctions.find_user_by_name(self, username)
+                user = User_Profile.find_user_by_name(self, username)
 
                 # checking if the user account is not verified
                 if user["verified_account"] == False:
@@ -992,7 +1077,7 @@ class MainWindow(QMainWindow):
             # remove the clear_history_confirm_widget from the dashboard display
             widgets.clear_history_confirm_widget.lower()
             # calling a function to remove all the activity history from the database
-            AppFunctions.clear_recent_activity_history(self,widgets.user_name.text(),widgets)
+            User_Profile.clear_recent_activity_history(self,widgets.user_name.text(),widgets)
 
         # clear_recent_history confirm cancel btn
         if btnName == "clear_history_confirm_cancel_btn":
@@ -1009,7 +1094,7 @@ class MainWindow(QMainWindow):
             # remove the clear_fav_history_confirm_widget from the dashboard display
             widgets.clear_fav_history_confirm_widget.lower()
             # calling a function to remove all the favourite history from the database
-            AppFunctions.clear_myfavourites_history(self, widgets.user_name.text(), widgets)
+            User_Profile.clear_myfavourites_history(self, widgets.user_name.text(), widgets)
 
         # clear_fav_history confirm cancel btn
         if btnName == "clear_fav_history_confirm_cancel_btn":
@@ -1040,11 +1125,11 @@ class MainWindow(QMainWindow):
         # send feedback confirmation ok btn
         if btnName == "confirm_feedback_widget_ok_btn":
             # finding the user from the database by using user name
-            user = AppFunctions.find_user_by_name(self, widgets.user_name.text())
+            user = User_Profile.find_user_by_name(self, widgets.user_name.text())
             # getting the feedback from the feedback input widget
             user_feedback = widgets.feedback.text()
             # calling a function to send the user email having the user feedback
-            AppFunctions.send_feedback(self, user["email"], user_feedback)
+            User_Profile.send_feedback(self, user["email"], user_feedback)
             # setting the success message label with Feedback Sent! Thanks for your support!
             widgets.feedback_success_msg.setText('Feedback Sent! Thanks for your support!')
             # prompt the feedback_sent_notification on the dashboard display
@@ -1052,7 +1137,7 @@ class MainWindow(QMainWindow):
             # remove the confirm_feedback_widget from the dashboard display
             widgets.confirm_feedback_widget.lower()
             # updating the user 'Feedback Sent' activity in the database
-            AppFunctions.update_recent_activity(self, user["name"], 'Feedback Sent', 'Medium', widgets)
+            User_Profile.update_recent_activity(self, user["name"], 'Feedback Sent', 'Medium', widgets)
 
         # send feedback confirmation cancel btn
         if btnName == "confirm_feedback_widget_cancel_btn":
@@ -1090,7 +1175,7 @@ class MainWindow(QMainWindow):
                 # getting the user name from the user name label
                 username = widgets.user_name.text()
                 # finding the user in the database by the user name
-                user = AppFunctions.find_user_by_name(self, username);
+                user = User_Profile.find_user_by_name(self, username);
                 # checking if the user account is verified
                 if user["verified_account"] == True:
                     # hiding the inappropriate widgets from the display
@@ -1134,10 +1219,10 @@ class MainWindow(QMainWindow):
             else:
                 widgets.stackedWidget_5.setCurrentWidget(widgets.profile_page)
                 usr_name = widgets.user_name.text()
-                usr = AppFunctions.find_user_by_name(self, usr_name)
-                AppFunctions.send_verify_email_to_user_email(self, usr["email"])
+                usr = User_Profile.find_user_by_name(self, usr_name)
+                User_Profile.send_verify_email_to_user_email(self, usr["email"])
                 widgets.verify_message_widget.raise_()
-                AppFunctions.update_recent_activity(self, usr_name, 'Applied for Account Verification', 'Medium',
+                User_Profile.update_recent_activity(self, usr_name, 'Applied for Account Verification', 'Medium',
                                                     widgets)
 
         # Verify_email message ok btn
@@ -1148,7 +1233,7 @@ class MainWindow(QMainWindow):
         # Verify_email success done btn
         if btnName == "acc_verify_done_btn":
             usr_name = widgets.user_name.text()
-            AppFunctions.update_account_verification(self, usr_name)
+            User_Profile.update_account_verification(self, usr_name)
             widgets.acc_verify_done_widget.hide()
             widgets.verify_message_widget.hide()
             widgets.acc_not_verify_widget.hide()
@@ -1158,7 +1243,7 @@ class MainWindow(QMainWindow):
             )
 
             widgets.stackedWidget_top_icons.setCurrentWidget(widgets.nav_icons_page)
-            AppFunctions.update_recent_activity(self, usr_name, 'Account Verified Successfully', 'High', widgets)
+            User_Profile.update_recent_activity(self, usr_name, 'Account Verified Successfully', 'High', widgets)
 
         # deactivate_account
         if btnName == "deactivate_account_btn":
@@ -1166,7 +1251,7 @@ class MainWindow(QMainWindow):
 
         # deactivate_account_ok
         if btnName == "deactivate_account_confirm_ok_btn":
-            AppFunctions.deactivate_account(self, widgets.profile_view_user_name.text())
+            User_Profile.deactivate_account(self, widgets.profile_view_user_name.text())
             widgets.deactivate_account_confirm_widget.lower()
             widgets.stackedWidget_3.hide()
             widgets.stackedWidget_5.setCurrentWidget(widgets.login_page)
@@ -1177,37 +1262,37 @@ class MainWindow(QMainWindow):
 
         # change_profile-pic
         if btnName == "profile_pic_change_btn":
-            new_pixmap = QPixmap(AppFunctions.getImage(self))
+            new_pixmap = QPixmap(self.getImage())
             if new_pixmap != widgets.profile_view_pic.pixmap():
-                AppFunctions.update_recent_activity(self, widgets.user_name.text(), 'Profile Pic Changed', 'Medium',
+                User_Profile.update_recent_activity(self, widgets.user_name.text(), 'Profile Pic Changed', 'Medium',
                                                     widgets)
             widgets.profile_view_pic.setPixmap(new_pixmap)
             username = widgets.user_name.text()
-            user = AppFunctions.find_user_by_name(self, username)
-            AppFunctions.update_profile_pic(self, user["name"], new_pixmap)
+            user = User_Profile.find_user_by_name(self, username)
+            User_Profile.update_profile_pic(self, user["name"], new_pixmap)
 
         # remove_profile-pic
         if btnName == "profile_pic_remove_btn":
             username = widgets.profile_view_user_name.text()
-            AppFunctions.remove_profile_pic(self, username)
-            AppFunctions.update_recent_activity(self, username, 'Profile Pic Removed', 'Medium', widgets)
+            User_Profile.remove_profile_pic(self, username)
+            User_Profile.update_recent_activity(self, username, 'Profile Pic Removed', 'Medium', widgets)
             widgets.profile_view_pic.setPixmap("./images/images/profile_pic.png")
 
         # logout
         if btnName == "logout_btn" or btnName == "btn_logout" or btnName == "signout_btn":
             loggedIn = False
             username = widgets.profile_view_user_name.text()
-            logout = AppFunctions.logout(self, username)
+            logout = User_Profile.logout(self, username)
             if logout == 'Logged out successfully':
                 widgets.stackedWidget_3.hide()
                 widgets.stackedWidget_5.setCurrentWidget(widgets.login_page)
-                AppFunctions.update_logout_activity(self, username, 'Logged Out', 'High')
+                User_Profile.update_logout_activity(self, username, 'Logged Out', 'High')
 
         if btnName == "datasets_btn":
             if loggedIn == False:
                 widgets.stackedWidget_5.setCurrentWidget(widgets.login_first_page)
             else:
-                AppFunctions.load_datasets_thumbs(self,widgets)
+                Datasets.load_datasets_thumbs(self,widgets)
                 widgets.stackedWidget_5.setCurrentWidget(widgets.content_page)
                 widgets.stackedWidget_content_pages.setCurrentWidget(widgets.datasets_page)
                 if datasets.count() == 3:
@@ -1216,7 +1301,7 @@ class MainWindow(QMainWindow):
                     widgets.new_datset_thumbnail_btn.hide()
 
                 elif datasets.count() > 3:
-                    new_dst_load = AppFunctions.load_new_dataset(self, widgets)
+                    new_dst_load = Datasets.load_new_dataset(self, widgets)
                     if new_dst_load == "new dataset loaded":
                         widgets.label_new_dataset.show()
                         widgets.new_datset_thumbnail.show()
@@ -1230,7 +1315,7 @@ class MainWindow(QMainWindow):
             if loggedIn == False:
                 widgets.stackedWidget_5.setCurrentWidget(widgets.login_first_page)
             else:
-                AppFunctions.load_datasets_thumbs(self, widgets)
+                Datasets.load_datasets_thumbs(self, widgets)
                 widgets.stackedWidget_5.setCurrentWidget(widgets.content_page)
                 widgets.stackedWidget_content_pages.setCurrentWidget(widgets.model_training_page)
                 if datasets.count() == 3:
@@ -1239,7 +1324,7 @@ class MainWindow(QMainWindow):
                     widgets.new_datset_thumbnail_btn_2.hide()
 
                 elif datasets.count() > 3:
-                    new_dst_load = AppFunctions.load_new_dataset(self, widgets)
+                    new_dst_load = Datasets.load_new_dataset(self, widgets)
                     if new_dst_load == "new dataset loaded":
                         widgets.label_new_dataset_2.show()
                         widgets.new_datset_thumbnail_2.show()
@@ -1253,12 +1338,12 @@ class MainWindow(QMainWindow):
             if loggedIn == False:
                 widgets.stackedWidget_5.setCurrentWidget(widgets.login_first_page)
             else:
-                outputs_load_status = AppFunctions.load_output_images_thumbs(self, widgets)
+                outputs_load_status = Outputs.load_output_images_thumbs(self, widgets)
                 print(outputs_load_status)
                 if outputs_load_status == "output loaded success":
                     widgets.stackedWidget_5.setCurrentWidget(widgets.content_page)
                     username = widgets.user_name.text()
-                    AppFunctions.load_favourite_btns(self, username, widgets)
+                    Outputs.load_favourite_btns(self, username, widgets)
                     widgets.stackedWidget_content_pages.setCurrentWidget(widgets.generated_images_page)
                     widgets.generated_images_stackedWidget.setCurrentWidget(widgets.output_thumbs_view_page)
                     widgets.outputs_thumb_view_btn.hide()
@@ -1328,80 +1413,80 @@ class MainWindow(QMainWindow):
 
         if btnName == "output_image_1_btn" or btnName == "output_image_2_btn" or btnName == "output_image_3_btn" or btnName == "output_image_4_btn" or btnName == "output_image_5_btn" or btnName== "output_image_6_btn":
             if btnName == "output_image_1_btn":
-                AppFunctions.open_image(self, widgets.output_image_1.pixmap())
+                self.open_image(widgets.output_image_1.pixmap())
             elif btnName == "output_image_2_btn":
-                AppFunctions.open_image(self, widgets.output_image_2.pixmap())
+                self.open_image(widgets.output_image_2.pixmap())
             elif btnName == "output_image_3_btn":
-                AppFunctions.open_image(self, widgets.output_image_3.pixmap())
+                self.open_image(widgets.output_image_3.pixmap())
             elif btnName == "output_image_4_btn":
-                AppFunctions.open_image(self, widgets.output_image_4.pixmap())
+                self.open_image(widgets.output_image_4.pixmap())
             elif btnName == "output_image_5_btn":
-                AppFunctions.open_image(self, widgets.output_image_5.pixmap())
+                self.open_image(widgets.output_image_5.pixmap())
             elif btnName == "output_image_6_btn":
-                AppFunctions.open_image(self, widgets.output_image_6.pixmap())
+                self.open_image(widgets.output_image_6.pixmap())
 
         if btnName == "output_folder_btn":
-            AppFunctions.open_output_folder(self)
+            Outputs.open_output_folder(self)
 
         if btnName == "create_new_dataset_btn":
             widgets.datsets_stackedWidget.setCurrentWidget(widgets.created_dataset_page)
 
         if btnName == "anime_thumbnail_btn":
-            AppFunctions.load_anime_dataset_imgs(self,widgets)
+            Datasets.load_anime_dataset_imgs(self,widgets)
             widgets.datsets_stackedWidget.setCurrentWidget(widgets.anime_dataset_page)
 
         if btnName == "human_thumbnail_btn":
-            AppFunctions.load_human_dataset_imgs(self, widgets)
+            Datasets.load_human_dataset_imgs(self, widgets)
             widgets.datsets_stackedWidget.setCurrentWidget(widgets.human_dataset_page)
 
         if btnName == "flower_thumbnail_btn":
-            AppFunctions.load_flower_dataset_imgs(self,widgets)
+            Datasets.load_flower_dataset_imgs(self,widgets)
             widgets.datsets_stackedWidget.setCurrentWidget(widgets.flower_datset_page)
 
         if btnName == "new_datset_thumbnail_btn":
-            AppFunctions.load_flower_dataset_imgs(self,widgets)
+            Datasets.load_flower_dataset_imgs(self,widgets)
             widgets.datsets_stackedWidget.setCurrentWidget(widgets.new_dataset_page)
 
         if btnName == "back_to_dataset_btn" or btnName == "back_to_dataset_btn_2" or btnName == "back_to_dataset_btn_3" or btnName == "back_to_dataset_btn_4" or btnName == "back_to_dataset_btn_5" or btnName == "back_to_dataset_btn_6":
             widgets.datsets_stackedWidget.setCurrentWidget(widgets.create_dataset_page)
 
         if btnName == "new_dst_upload_thumb_btn":
-            widgets.new_dst_u_image_0.setPixmap(QPixmap(AppFunctions.getImage(self)))
+            widgets.new_dst_u_image_0.setPixmap(QPixmap(self.getImage()))
             # widgets.profile_image.resize(70, 70)
 
         if btnName == "new_dst_u_image_1_btn":
-            widgets.new_dst_u_image_1.setPixmap(QPixmap(AppFunctions.getImage(self)))
+            widgets.new_dst_u_image_1.setPixmap(QPixmap(self.getImage()))
             # widgets.profile_image.resize(70, 70)
 
         if btnName == "new_dst_u_image_2_btn":
-            widgets.new_dst_u_image_2.setPixmap(QPixmap(AppFunctions.getImage(self)))
+            widgets.new_dst_u_image_2.setPixmap(QPixmap(self.getImage()))
             # widgets.profile_image.resize(70, 70)
 
         if btnName == "new_dst_u_image_3_btn":
-            widgets.new_dst_u_image_3.setPixmap(QPixmap(AppFunctions.getImage(self)))
+            widgets.new_dst_u_image_3.setPixmap(QPixmap(self.getImage()))
             # widgets.profile_image.resize(70, 70)
 
         if btnName == "new_dst_u_image_4_btn":
-            widgets.new_dst_u_image_4.setPixmap(QPixmap(AppFunctions.getImage(self)))
+            widgets.new_dst_u_image_4.setPixmap(QPixmap(self.getImage()))
             # widgets.profile_image.resize(70, 70)
 
         if btnName == "new_dst_u_image_5_btn":
-            widgets.new_dst_u_image_5.setPixmap(QPixmap(AppFunctions.getImage(self)))
+            widgets.new_dst_u_image_5.setPixmap(QPixmap(self.getImage()))
             # widgets.profile_image.resize(70, 70)
 
         if btnName == "create_dst_done_btn":
-            dataset_creation = AppFunctions.create_dataset(self,widgets)
+            dataset_creation = Datasets.create_dataset(self,widgets)
             if  dataset_creation == "dataset not created":
                 widgets.dst_fail_notification.raise_()
             elif dataset_creation == "dataset created":
                 user = widgets.user_name.text()
-                AppFunctions.update_recent_activity(self, user, 'Created Dataset',
+                User_Profile.update_recent_activity(self, user, 'Created Dataset',
                                                     'High', widgets)
                 widgets.dst_success_notification.raise_()
 
         if btnName == "dst_success_ok_btn":
             widgets.dst_success_notification.lower()
-            new_dst_load = AppFunctions.load_new_dataset(self, widgets)
+            new_dst_load = Datasets.load_new_dataset(self, widgets)
             if new_dst_load == "new dataset loaded":
                 widgets.label_new_dataset.show()
                 widgets.new_datset_thumbnail.show()
@@ -1416,11 +1501,11 @@ class MainWindow(QMainWindow):
             widgets.dst_fail_notification.lower()
 
         if btnName == "upload_images_btn":
-            widgets.new_dst_image_6.setPixmap(QPixmap(AppFunctions.getImage(self)))
-            new_image_to_dst = AppFunctions.add_image_to_dataset(self, widgets)
+            widgets.new_dst_image_6.setPixmap(QPixmap(self.getImage()))
+            new_image_to_dst = Datasets.add_image_to_dataset(self, widgets)
             if new_image_to_dst == 'image added':
                 user = widgets.user_name.text()
-                AppFunctions.update_recent_activity(self, user, 'Uploaded Image',
+                User_Profile.update_recent_activity(self, user, 'Uploaded Image',
                                                     'High', widgets)
                 widgets.label_24.setText('Image Added Successfully')
                 widgets.new_dst_success_notification.raise_()
@@ -1433,12 +1518,12 @@ class MainWindow(QMainWindow):
 
         if btnName == "new_dataset_del_confirm_ok_btn":
             widgets.new_dataset_del_confirm_widget.lower()
-            dataset_deletion = AppFunctions.delete_new_dataset(self)
+            dataset_deletion = Datasets.delete_new_dataset(self)
             if dataset_deletion == 'dataset deleted':
                 user = widgets.user_name.text()
-                AppFunctions.update_recent_activity(self, user, 'Dateset Deleted',
+                User_Profile.update_recent_activity(self, user, 'Dateset Deleted',
                                                     'High', widgets)
-                new_dst_load = AppFunctions.load_new_dataset(self, widgets)
+                new_dst_load = Datasets.load_new_dataset(self, widgets)
                 if new_dst_load == "new dataset loaded":
                     widgets.label_new_dataset.show()
                     widgets.new_datset_thumbnail.show()
@@ -1463,7 +1548,7 @@ class MainWindow(QMainWindow):
             widgets.new_dst_success_notification.lower()
 
         if btnName == "searched_dst_thumbnail_btn" or btnName == "view_searched_dst_btn":
-            AppFunctions.load_searched_dataset(self,widgets)
+            Datasets.load_searched_dataset(self,widgets)
             widgets.dataset_found_widget.lower()
             widgets.datsets_stackedWidget.setCurrentWidget(widgets.found_dataset_page)
 
@@ -1480,11 +1565,11 @@ class MainWindow(QMainWindow):
             widgets.dataset_not_found_widget_2.lower()
 
         if btnName == "upload_images_btn_2":
-            widgets.new_dst_image_12.setPixmap(QPixmap(AppFunctions.getImage(self)))
-            new_image_to_dst = AppFunctions.add_image_to_searched_dataset(self, widgets)
+            widgets.new_dst_image_12.setPixmap(QPixmap(self.getImage()))
+            new_image_to_dst = Datasets.add_image_to_searched_dataset(self, widgets)
             if new_image_to_dst == 'image added':
                 user = widgets.user_name.text()
-                AppFunctions.update_recent_activity(self, user, 'Uploaded Image',
+                User_Profile.update_recent_activity(self, user, 'Uploaded Image',
                                                     'High', widgets)
                 widgets.label_30.setText('Image Added Successfully')
                 widgets.new_dst_success_notification_2.raise_()
@@ -1500,9 +1585,9 @@ class MainWindow(QMainWindow):
 
         if btnName == "new_dataset_del_confirm_ok_btn_2":
             widgets.new_dataset_del_confirm_widget_2.lower()
-            dataset_deletion = AppFunctions.delete_searched_dataset(self,widgets)
+            dataset_deletion = Datasets.delete_searched_dataset(self,widgets)
             if dataset_deletion == 'dataset deleted':
-                new_dst_load = AppFunctions.load_new_dataset(self, widgets)
+                new_dst_load = Datasets.load_new_dataset(self, widgets)
                 if new_dst_load == "new dataset loaded":
                     widgets.label_new_dataset.show()
                     widgets.new_datset_thumbnail.show()
@@ -1529,10 +1614,10 @@ class MainWindow(QMainWindow):
 
         if btnName == "run_gan_btn":
             user = widgets.user_name.text()
-            AppFunctions.update_recent_activity(self, user, 'Started Training',
+            User_Profile.update_recent_activity(self, user, 'Started Training',
                                                 'High', widgets)
-            AppFunctions.train_model(self,widgets)
-            AppFunctions.update_recent_activity(self, user, 'Ended Training',
+            Gan_Model.train_model(self,widgets)
+            User_Profile.update_recent_activity(self, user, 'Ended Training',
                                                 'High', widgets)
 
         if btnName == "change_dst_btn":
@@ -1552,21 +1637,21 @@ class MainWindow(QMainWindow):
 
         if btnName == "rerun_training_confirm_ok_btn":
             user = widgets.user_name.text()
-            AppFunctions.update_recent_activity(self, user, 'ReStarted Training',
+            User_Profile.update_recent_activity(self, user, 'ReStarted Training',
                                                 'High', widgets)
-            AppFunctions.train_model(self, widgets)
-            AppFunctions.update_recent_activity(self, user, 'Ended Training',
+            Gan_Model.train_model(self, widgets)
+            User_Profile.update_recent_activity(self, user, 'Ended Training',
                                             'High', widgets)
         if btnName == "rerun_training_confirm_cancel_btn":
             widgets.rerun_training_confirm_widget.lower()
 
 
         if btnName == "view_generated_imgs_btn":
-            outputs_load_status = AppFunctions.load_output_images_thumbs(self, widgets)
+            outputs_load_status = Outputs.load_output_images_thumbs(self, widgets)
             if outputs_load_status == "output loaded success":
                 widgets.stackedWidget_5.setCurrentWidget(widgets.content_page)
                 username = widgets.user_name.text()
-                AppFunctions.load_favourite_btns(self, username, widgets)
+                Outputs.load_favourite_btns(self, username, widgets)
                 widgets.stackedWidget_content_pages.setCurrentWidget(widgets.generated_images_page)
                 widgets.generated_images_stackedWidget.setCurrentWidget(widgets.output_thumbs_view_page)
                 widgets.outputs_thumb_view_btn.hide()
@@ -1579,106 +1664,106 @@ class MainWindow(QMainWindow):
 
         if btnName == "make_fav1_btn":
             username = widgets.user_name.text()
-            AppFunctions.update_myfavourites(self, username, widgets.output_image_1.pixmap(),"Image", widgets)
+            Outputs.update_myfavourites(self, username, widgets.output_image_1.pixmap(),"Image", widgets)
             widgets.make_fav1_btn.hide()
             widgets.remove_fav1_btn.show()
-            AppFunctions.update_recent_activity(self, username, 'Favourite Added',
+            User_Profile.update_recent_activity(self, username, 'Favourite Added',
                                                 'High', widgets)
 
         if btnName == "make_fav2_btn":
             username = widgets.user_name.text()
-            AppFunctions.update_myfavourites(self, username, widgets.output_image_2.pixmap(), "Image", widgets)
+            Outputs.update_myfavourites(self, username, widgets.output_image_2.pixmap(), "Image", widgets)
             widgets.make_fav2_btn.hide()
             widgets.remove_fav2_btn.show()
-            AppFunctions.update_recent_activity(self, username, 'Favourite Added',
+            User_Profile.update_recent_activity(self, username, 'Favourite Added',
                                                 'High', widgets)
 
         if btnName == "make_fav3_btn":
             username = widgets.user_name.text()
-            AppFunctions.update_myfavourites(self, username, widgets.output_image_3.pixmap(), "Image", widgets)
+            Outputs.update_myfavourites(self, username, widgets.output_image_3.pixmap(), "Image", widgets)
             widgets.make_fav3_btn.hide()
             widgets.remove_fav3_btn.show()
-            AppFunctions.update_recent_activity(self, username, 'Favourite Added',
+            User_Profile.update_recent_activity(self, username, 'Favourite Added',
                                                 'High', widgets)
 
         if btnName == "make_fav4_btn":
             username = widgets.user_name.text()
-            AppFunctions.update_myfavourites(self, username, widgets.output_image_4.pixmap(), "Image", widgets)
+            Outputs.update_myfavourites(self, username, widgets.output_image_4.pixmap(), "Image", widgets)
             widgets.make_fav4_btn.hide()
             widgets.remove_fav4_btn.show()
-            AppFunctions.update_recent_activity(self, username, 'Favourite Added',
+            User_Profile.update_recent_activity(self, username, 'Favourite Added',
                                                 'High', widgets)
 
         if btnName == "make_fav5_btn":
             username = widgets.user_name.text()
-            AppFunctions.update_myfavourites(self, username, widgets.output_image_5.pixmap(), "Image", widgets)
+            Outputs.update_myfavourites(self, username, widgets.output_image_5.pixmap(), "Image", widgets)
             widgets.make_fav5_btn.hide()
             widgets.remove_fav5_btn.show()
-            AppFunctions.update_recent_activity(self, username, 'Favourite Added',
+            User_Profile.update_recent_activity(self, username, 'Favourite Added',
                                                 'High', widgets)
 
         if btnName == "make_fav6_btn":
             username = widgets.user_name.text()
-            AppFunctions.update_myfavourites(self, username, widgets.output_image_6.pixmap(), "Image", widgets)
+            Outputs.update_myfavourites(self, username, widgets.output_image_6.pixmap(), "Image", widgets)
             widgets.make_fav6_btn.hide()
             widgets.remove_fav6_btn.show()
-            AppFunctions.update_recent_activity(self, username, 'Favourite Added',
+            User_Profile.update_recent_activity(self, username, 'Favourite Added',
                                                 'High', widgets)
 
         if btnName == "remove_fav1_btn":
             username = widgets.user_name.text()
-            AppFunctions.remove_favourite(self,username,widgets.output_image_1.pixmap(),widgets)
+            Outputs.remove_favourite(self,username,widgets.output_image_1.pixmap(),widgets)
             widgets.remove_fav1_btn.hide()
             widgets.make_fav1_btn.show()
-            AppFunctions.update_recent_activity(self, username, 'Favourite Removed',
+            User_Profile.update_recent_activity(self, username, 'Favourite Removed',
                                                 'High', widgets)
 
         if btnName == "remove_fav2_btn":
             username = widgets.user_name.text()
-            AppFunctions.remove_favourite(self, username, widgets.output_image_2.pixmap(), widgets)
+            Outputs.remove_favourite(self, username, widgets.output_image_2.pixmap(), widgets)
             widgets.remove_fav2_btn.hide()
             widgets.make_fav2_btn.show()
-            AppFunctions.update_recent_activity(self, username, 'Favourite Removed',
+            User_Profile.update_recent_activity(self, username, 'Favourite Removed',
                                                 'High', widgets)
 
         if btnName == "remove_fav3_btn":
             username = widgets.user_name.text()
-            AppFunctions.remove_favourite(self, username, widgets.output_image_3.pixmap(), widgets)
+            Outputs.remove_favourite(self, username, widgets.output_image_3.pixmap(), widgets)
             widgets.remove_fav3_btn.hide()
             widgets.make_fav3_btn.show()
-            AppFunctions.update_recent_activity(self, username, 'Favourite Removed',
+            User_Profile.update_recent_activity(self, username, 'Favourite Removed',
                                                 'High', widgets)
 
         if btnName == "remove_fav4_btn":
             username = widgets.user_name.text()
-            AppFunctions.remove_favourite(self, username, widgets.output_image_4.pixmap(), widgets)
+            Outputs.remove_favourite(self, username, widgets.output_image_4.pixmap(), widgets)
             widgets.remove_fav4_btn.hide()
             widgets.make_fav4_btn.show()
-            AppFunctions.update_recent_activity(self, username, 'Favourite Removed',
+            User_Profile.update_recent_activity(self, username, 'Favourite Removed',
                                                 'High', widgets)
 
         if btnName == "remove_fav5_btn":
             username = widgets.user_name.text()
-            AppFunctions.remove_favourite(self, username, widgets.output_image_5.pixmap(), widgets)
+            Outputs.remove_favourite(self, username, widgets.output_image_5.pixmap(), widgets)
             widgets.remove_fav5_btn.hide()
             widgets.make_fav5_btn.show()
-            AppFunctions.update_recent_activity(self, username["name"], 'Favourite Removed',
+            User_Profile.update_recent_activity(self, username["name"], 'Favourite Removed',
                                                 'High', widgets)
 
         if btnName == "remove_fav6_btn":
             username = widgets.user_name.text()
-            AppFunctions.remove_favourite(self, username, widgets.output_image_6.pixmap(), widgets)
+            Outputs.remove_favourite(self, username, widgets.output_image_6.pixmap(), widgets)
             widgets.remove_fav6_btn.hide()
             widgets.make_fav6_btn.show()
-            AppFunctions.update_recent_activity(self, username, 'Favourite Removed',
+            User_Profile.update_recent_activity(self, username, 'Favourite Removed',
                                                 'High', widgets)
 
         if btnName == "outputs_list_view_btn":
-            outputs_load_status = AppFunctions.load_output_images_list(self, widgets)
+            outputs_load_status = Outputs.load_output_images_list(self, widgets)
             if outputs_load_status == "output loaded success":
                 widgets.stackedWidget_5.setCurrentWidget(widgets.content_page)
                 username = widgets.user_name.text()
-                AppFunctions.load_favourite_btns(self, username, widgets)
+                Outputs.load_favourite_btns(self, username, widgets)
                 widgets.stackedWidget_content_pages.setCurrentWidget(widgets.generated_images_page)
                 widgets.generated_images_stackedWidget.setCurrentWidget(widgets.output_list_view_page)
                 widgets.outputs_thumb_view_btn.show()
@@ -1691,11 +1776,11 @@ class MainWindow(QMainWindow):
                 widgets.outputs_list_view_btn.hide()
 
         if btnName == "outputs_thumb_view_btn":
-            outputs_load_status = AppFunctions.load_output_images_thumbs(self, widgets)
+            outputs_load_status = Outputs.load_output_images_thumbs(self, widgets)
             if outputs_load_status == "output loaded success":
                 widgets.stackedWidget_5.setCurrentWidget(widgets.content_page)
                 username = widgets.user_name.text()
-                AppFunctions.load_favourite_btns(self, username, widgets)
+                Outputs.load_favourite_btns(self, username, widgets)
                 widgets.stackedWidget_content_pages.setCurrentWidget(widgets.generated_images_page)
                 widgets.generated_images_stackedWidget.setCurrentWidget(widgets.output_thumbs_view_page)
                 widgets.outputs_thumb_view_btn.hide()
@@ -1707,24 +1792,24 @@ class MainWindow(QMainWindow):
                 widgets.outputs_list_view_btn.hide()
 
         if btnName == "open_favourite_btn":
-            AppFunctions.open_favourite(self,widgets)
+            User_Profile.open_favourite(self,widgets)
 
         if btnName == "open_output_list_img_btn":
-            AppFunctions.open_output_list_image(self,widgets)
+            Outputs.open_output_list_image(self,widgets)
 
         if btnName == "update_algo_btn":
             widgets.update_algo_widget.raise_()
 
         if btnName == "update_algo_ok_btn":
             key = widgets.admin_key.text()
-            match_result = AppFunctions.match_admin_secret_key(self,key)
+            match_result = User_Profile.match_admin_secret_key(self,key)
             if match_result == 'Key Found':
                 user = widgets.user_name.text()
                 widgets.key_match_error.setText("")
                 widgets.update_algo_widget.lower()
-                AppFunctions.update_recent_activity(self, user, "Started Algo Update",'High', widgets)
-                AppFunctions.update_algo(self)
-                AppFunctions.update_recent_activity(self, user, "Ended Algo Update",'High', widgets)
+                User_Profile.update_recent_activity(self, user, "Started Algo Update",'High', widgets)
+                Gan_Model.update_algo(self)
+                User_Profile.update_recent_activity(self, user, "Ended Algo Update",'High', widgets)
             elif match_result == 'Key Not Found':
                 widgets.key_match_error.setText("Key Not Found")
 
