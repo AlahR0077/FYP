@@ -31,7 +31,7 @@ class Gan_Model(MainWindow):
         widgets.stackedWidget_model_training.setCurrentWidget(widgets.model_progress_page)
         #
         # opening browser on the background
-        chrome_options.add_argument("--headless")
+        #chrome_options.add_argument("--headless")
 
         # Creating a Chrome driver instance
         driver = webdriver.Chrome(executable_path=CHROMEDRIVER_PATH, chrome_options=chrome_options)
@@ -45,27 +45,27 @@ class Gan_Model(MainWindow):
         password = driver.find_element_by_name("password")
         password.send_keys("kazmi12!")
         # Clicking sign in btn
-        sign_in_butn = driver.find_element_by_class_name("sc-psCJM.mBUMG")
+        sign_in_butn = driver.find_element_by_xpath("/html/body/main/div[1]/div[1]/div/form/div[2]/div[3]/button")
         sign_in_butn.click()
         # Redirecting to generate-realistic-human-face-using-gan edit page
         driver.get('https://www.kaggle.com/aiimages/generate-realistic-human-face-using-gan/edit')
 
         # Clicking the session btn to start the session
         time.sleep(3)
-        session_btn = driver.find_element_by_xpath(
-            "/html/body/div[1]/div/div/div[5]/div[2]/div[2]/div/div/div/div/div[1]/div[3]/button[1]")
+        session_btn = driver.find_element_by_xpath("/html/body/div[1]/div/div/div[5]/div[2]/div[2]/div/div/div/div/div[1]/div[3]/button[1]")
         session_btn.click()
         time.sleep(3)
 
         # Clicking the settings tab to display
-        settings_down_btn = driver.find_element_by_css_selector(
-            "#site-content > div.AppView-sc-16eb2j.kDpcJw > div.App_Body-sc-16c8j4p.hxOBfv > div.Sidebar_Body-sc-14r4g35.dEilyb > div > div:nth-child(2) > div > div:nth-child(2) > div > div.SidebarPane_ChevronWrapper-sc-qm9hj3.yjdaM > button > span.MuiIconButton-label > i")
+        settings_down_btn = driver.find_element_by_xpath("/html/body/div[1]/div/div/div[5]/div[2]/div[2]/div[2]/div/div[2]/div/div[2]/div/div[3]/button")
+
+        #settings_down_btn = driver.find_element_by_css_selector(
+         #   "#site-content > div.AppView--16eb2j.kMYsPa > div.App_Body--16c8j4p.lpnlFZ > div.Sidebar_Body--14r4g35.krYMPd > div > div:nth-child(2) > div > div:nth-child(2) > div > div.SidebarPane_ChevronWrapper--qm9hj3.jkhhYy > button")
         settings_down_btn.click()
         time.sleep(1)
 
         # Clicking the Accelerator button to use the GPU for the model training process
-        accelerator_btn = driver.find_element_by_xpath(
-            "/html/body/div[1]/div/div/div[5]/div[2]/div[2]/div[2]/div/div[2]/div/div[2]/div[2]/div/div[3]/div[2]/div/button")
+        accelerator_btn = driver.find_element_by_xpath("/html/body/div[1]/div/div/div[5]/div[2]/div[2]/div[2]/div/div[2]/div/div[2]/div[2]/div/div[3]/div[2]/div/button")
         accelerator_btn.click()
         time.sleep(2)
 
@@ -74,17 +74,14 @@ class Gan_Model(MainWindow):
         time.sleep(1)
         gpu_btn.click()
         time.sleep(1)
-        turn_on_gpu_btn = driver.find_element_by_xpath(
-            "/html/body/div[1]/div/div/div[5]/div[2]/div[4]/div[1]/div/div[2]/button[2]/span")
+        turn_on_gpu_btn = driver.find_element_by_xpath("/html/body/div[1]/div/div/div[5]/div[2]/div[4]/div[1]/div/div[2]/button[2]/span")
         turn_on_gpu_btn.click()
 
         # Clicking the RUN GAN algorithm on kaggle
-        run_all_btn = driver.find_element_by_xpath(
-            "/html/body/div[1]/div/div/div[5]/div[2]/div[2]/div[1]/div/div/div/div[1]/div[1]/button[7]")
+        run_all_btn = driver.find_element_by_xpath("/html/body/div[1]/div/div/div[5]/div[2]/div[2]/div[1]/div/div/div/div[1]/div[1]/button[7]")
 
         # Checking if the session is LIVE
-        green_signal = driver.find_element_by_xpath(
-            "/html/body/div[1]/div/div/div[5]/div[2]/div[2]/div/div/div/div/div[1]/button/div[1]/div[1]/i")
+        green_signal = driver.find_element_by_xpath("/html/body/div[1]/div/div/div[5]/div[2]/div[2]/div/div/div/div/div[1]/button/div[1]/div[1]/i")
 
         # if not, wait for the active session
         while green_signal.get_attribute("color") != "#42E3BB":
@@ -105,7 +102,7 @@ class Gan_Model(MainWindow):
         iframe = driver.find_element_by_tag_name('iframe')
 
         # Switching driver settings to Iframe
-        driver.switch_to_frame(iframe)
+        driver.switch_to.frame(iframe)
 
         # Settings the maximum values of the components accordingly
         widgets.training_progressBar.setMaximum(150)
@@ -115,9 +112,7 @@ class Gan_Model(MainWindow):
         while (True):
             try:
                 # Getting the dataset processing stats
-                c = WebDriverWait(driver, 0.1).until(
-                    EC.presence_of_element_located((By.XPATH,
-                                                    "/html/body/div[4]/div[3]/div[2]/div[3]/div[2]/div[2]/div[8]/div[3]/div[2]/div/div[2]/pre")))
+                c = WebDriverWait(driver, 0.1).until(EC.presence_of_element_located((By.XPATH,"/html/body/div[4]/div[3]/div[2]/div[3]/div[2]/div[2]/div[8]/div[3]/div[2]/div/div[2]/pre")))
                 dataset_progress_number = (c.text).split('%')[0]
                 if dataset_progress_number != "100":
                     widgets.dataset_processing_bar.setValue(int(dataset_progress_number) + 1)
@@ -134,9 +129,7 @@ class Gan_Model(MainWindow):
                         )
 
                 # Getting the training processing stats, (i.e. epoch, trainining time and output images count)
-                d = WebDriverWait(driver, 0.1).until(
-                    EC.presence_of_element_located((By.XPATH,
-                                                    "/html/body/div[4]/div[3]/div[2]/div[3]/div[2]/div[2]/div[26]/div[3]/div[2]/div/div[2]/pre")))
+                d = WebDriverWait(driver, 0.1).until(EC.presence_of_element_located((By.XPATH,"/html/body/div[4]/div[3]/div[2]/div[3]/div[2]/div[2]/div[26]/div[3]/div[2]/div/div[2]/pre")))
                 d = (d.text).splitlines()
                 d = d[-1]
                 print(d)
@@ -188,27 +181,24 @@ class Gan_Model(MainWindow):
         time.sleep(5)
 
         # Refreshing the output folders on kaggle site
-        dataset_show = driver.find_element_by_xpath(
-            "/html/body/div[1]/div/div/div[5]/div[2]/div[2]/div[2]/div/div[2]/div/div[1]/div/div[3]")
+        dataset_show = driver.find_element_by_xpath("/html/body/div[1]/div/div/div[5]/div[2]/div[2]/div[2]/div/div[2]/div/div[1]/div/div[3]")
         dataset_show.click()
-        refresh_btn_ = driver.find_element_by_css_selector(
-            "#site-content > div.AppView-sc-16eb2j.kDpcJw > div.App_Body-sc-16c8j4p.hxOBfv > div.Sidebar_Body-sc-14r4g35.dEilyb > div > div:nth-child(2) > div > div:nth-child(1) > div.SidebarPane_ItemBody-sc-tqtqts.jKIbPu > div > div:nth-child(2) > ul > ul > div > div.sc-pRrUz.dQnepB > div > div.sc-pYNsO.YWalf > div.sc-pByoR.eHxtff > i")
+        refresh_btn_ = driver.find_element_by_xpath("/html/body/div[1]/div/div/div[5]/div[2]/div[2]/div[2]/div/div[2]/div/div[1]/div[2]/div/div[2]/ul/ul/div/div[4]/div/div[2]/div[1]/i")
+        #refresh_btn_ = driver.find_element_by_css_selector(
+         #   "#site-content > div.AppView-sc-16eb2j.kDpcJw > div.App_Body-sc-16c8j4p.hxOBfv > div.Sidebar_Body-sc-14r4g35.dEilyb > div > div:nth-child(2) > div > div:nth-child(1) > div.SidebarPane_ItemBody-sc-tqtqts.jKIbPu > div > div:nth-child(2) > ul > ul > div > div.sc-pRrUz.dQnepB > div > div.sc-pYNsO.YWalf > div.sc-pByoR.eHxtff > i")
         ActionChains(driver).move_to_element(refresh_btn_).click().perform()
         output_fold = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH,
-                                            "//*[@id='site-content']/div[2]/div[2]/div[2]/div/div[2]/div/div[1]/div[2]/div/div[2]/ul/ul/div/div[3]")))
+            EC.presence_of_element_located((By.XPATH,"//*[@id='site-content']/div[2]/div[2]/div[2]/div/div[2]/div/div[1]/div[2]/div/div[2]/ul/ul/div/div[3]")))
         output_fold.click()
         time.sleep(1)
         ActionChains(driver).reset_actions()
         output_fold2 = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH,
-                                            "//*[@id='site-content']/div[2]/div[2]/div[2]/div/div[2]/div/div[1]/div[2]/div/div[2]/ul/ul/ul/ul/div/div[3]")))
+            EC.presence_of_element_located((By.XPATH,"//*[@id='site-content']/div[2]/div[2]/div[2]/div/div[2]/div/div[1]/div[2]/div/div[2]/ul/ul/ul/ul/div/div[3]")))
         ActionChains(driver).move_to_element(output_fold2).double_click().perform()
         time.sleep(2)
 
         # Getting the access to output generated images
-        im = driver.find_element_by_xpath(
-            "/html/body/div[1]/div/div/div[5]/div[2]/div[2]/div[2]/div/div[2]/div/div[1]/div[2]/div/div[2]/ul/ul/ul/ul/ul")
+        im = driver.find_element_by_xpath("/html/body/div[1]/div/div/div[5]/div[2]/div[2]/div[2]/div/div[2]/div/div[1]/div[2]/div/div[2]/ul/ul/ul/ul/ul")
         images = im.find_elements_by_class_name("sc-oUaSW.fZWUHt")
 
         # Fetching the list of all generated images and downloading them to local machine

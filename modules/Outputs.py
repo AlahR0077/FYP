@@ -317,3 +317,4 @@ class Outputs(MainWindow):
         # except block
         except:
             pass
+

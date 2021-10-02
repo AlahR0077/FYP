@@ -18,10 +18,10 @@ from PySide6.QtGui import *
 from PySide6.QtWidgets import *
 
 # GUI FILE
-from . ui_main import Ui_MainWindow
+from . ui_main import *
 
 # APP SETTINGS
-from . app_settings import Settings
+from . app_settings import *
 
 # IMPORT FUNCTIONS
 from . ui_functions import *
@@ -49,3 +49,6 @@ from . Video_Customization import *
 
 # Style_Gan_Model Class
 from . Style_Gan_Model import *
+
+# draw Class
+from . draw import *
