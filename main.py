@@ -25,8 +25,12 @@ import platform
 import os
 import time
 import glob
+import webbrowser
+
 import cv2
 import base64
+
+import numpy
 import pymongo
 import bcrypt
 import re
@@ -40,15 +44,28 @@ import numpy as np
 import pandas as pd
 import pickle
 import threading
+import undetected_chromedriver.v2 as uc
+import threading
+import zipfile
+import subprocess
+import skimage
+import skimage.feature
+import skimage.viewer
+from PIL import Image
+from resizeimage import resizeimage
 
 # Import Required Packages
 # ///////////////////////////////////////////////////////////////
 from bson.binary import Binary
+from PIL import ImageEnhance
 from selenium import webdriver
 from selenium.webdriver import ActionChains
+from selenium.webdriver.common.alert import Alert
 from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from matplotlib import pyplot as plt
@@ -58,12 +75,11 @@ from collections import deque
 from email.message import EmailMessage
 from string import Template
 from datetime import datetime
-
+from modules.common import Sketcher
 # Import GUI and Modules and Widgets
 # ///////////////////////////////////////////////////////////////
 import PySide6
 from PySide6 import QtGui, QtCore
-
 from modules import *
 from widgets import *
 
@@ -91,7 +107,7 @@ prefs = {"profile.default_content_settings.popups": 0,
                  "download.default_directory": r"C:\Users\SYS\Downloads\AI Images\\",
                  "directory_upgrade": True}
 chrome_options.add_experimental_option("prefs",prefs)
-# chrome_options.add_argument("--headless")
+#chrome_options.add_argument("--headless")
 chrome_options.add_argument("--window-size=%s" % WINDOW_SIZE)
 chrome_options.binary_location = CHROME_PATH
 
@@ -102,7 +118,7 @@ widgets = None
 # GLOBALS
 counter = 0
 jumper = 10
-
+custom_image = 0
 # Set Email Services
 # ///////////////////////////////////////////////////////////////
 app_password = "wspeshfphgmsbbrq"
@@ -110,9 +126,9 @@ host_user = "awaiskfiverr@gmail.com"
 smtp = smtplib.SMTP_SSL('smtp.gmail.com',465)
 smtp.login(host_user, app_password)
 server = ei.connect("imap.gmail.com", host_user, app_password)
-confirm_email = server.mail(server.listids()[0])
-uemail = confirm_email.from_addr
-confirm_email.title
+#confirm_email = server.mail(server.listids()[0])
+#uemail = confirm_email.from_addr
+#confirm_email.title
 
 # MAIN WINDOW CLASS
 # ///////////////////////////////////////////////////////////////
@@ -212,6 +228,7 @@ class MainWindow(QMainWindow):
         # ///////////////////////////////////////////////////////////////
         self.search_timer.timeout.connect(self.getSearch)
         self.search_timer.start(6000)
+        self.translation_process = False
 
         # Show CPU Function Call
         # ///////////////////////////////////////////////////////////////
@@ -355,6 +372,116 @@ class MainWindow(QMainWindow):
         widgets.outputs_thumb_view_btn.clicked.connect(self.buttonClick)
         widgets.outputs_list_view_btn.clicked.connect(self.buttonClick)
         widgets.output_folder_btn.clicked.connect(self.buttonClick)
+#stylegan widgets
+        widgets.style_gan_tab_btn.clicked.connect(self.buttonClick)
+        widgets.login_google_btn.clicked.connect(self.buttonClick)
+        widgets.login_success_ok_btn_2.clicked.connect(self.buttonClick)
+        widgets.login_fail_ok_btn_2.clicked.connect(self.buttonClick)
+
+        widgets.forget_pass_name_google_btn.clicked.connect(self.buttonClick)
+        widgets.signup_google_btn.clicked.connect(self.buttonClick)
+        widgets.google_verify_code_widget_ok_btn.clicked.connect(self.buttonClick)
+        widgets.google_verify_code_widget_cancel_btn.clicked.connect(self.buttonClick)
+        widgets.google_verify_code_widget_resend_btn.clicked.connect(self.buttonClick)
+
+        widgets.anime_thumbnail_btn_3.clicked.connect(self.buttonClick)
+        widgets.human_thumbnail_btn_3.clicked.connect(self.buttonClick)
+        widgets.flower_thumbnail_btn_3.clicked.connect(self.buttonClick)
+        widgets.new_datset_thumbnail_btn_3.clicked.connect(self.buttonClick)
+        widgets.style_gan1_btn.clicked.connect(self.buttonClick)
+        widgets.style_gan2_btn.clicked.connect(self.buttonClick)
+        widgets.logout_google_btn.clicked.connect(self.buttonClick)
+        widgets.train_stylegan_btn.clicked.connect(self.buttonClick)
+        widgets.update_stylegan_algo_btn.clicked.connect(self.buttonClick)
+        widgets.update_algo_ok_btn_2.clicked.connect(self.buttonClick)
+        widgets.update_algo_cancel_btn_2.clicked.connect(self.buttonClick)
+        widgets.back_to_models_btn_1.clicked.connect(self.buttonClick)
+        widgets.back_to_models_btn_2.clicked.connect(self.buttonClick)
+        widgets.mount_gdrive_style1_btn.clicked.connect(self.buttonClick)
+        widgets.generate_images_style1_btn.clicked.connect(self.buttonClick)
+        widgets.rerun_style1gan_btn.clicked.connect(self.buttonClick)
+        widgets.cancel_progress_style1_btn.clicked.connect(self.buttonClick)
+        widgets.view_style1_generated_imgs_btn.clicked.connect(self.buttonClick)
+
+        widgets.rerun_stylegan1_confirm_ok_btn.clicked.connect(self.buttonClick)
+        widgets.rerun_tstylegan1_confirm_cancel_btn.clicked.connect(self.buttonClick)
+        widgets.cancel_stylegan1_confirm_ok_btn.clicked.connect(self.buttonClick)
+        widgets.cancel_stylegan1_confirm_cancel_btn.clicked.connect(self.buttonClick)
+
+        widgets.mount_gdrive_style2_btn.clicked.connect(self.buttonClick)
+        widgets.generate_images_style2_btn.clicked.connect(self.buttonClick)
+        widgets.rerun_style2gan_btn.clicked.connect(self.buttonClick)
+        widgets.cancel_progress_style2_btn.clicked.connect(self.buttonClick)
+        widgets.view_style2_generated_imgs_btn.clicked.connect(self.buttonClick)
+        widgets.back_to_style1_page_btn.clicked.connect(self.buttonClick)
+        widgets.back_to_style2_page_btn.clicked.connect(self.buttonClick)
+        widgets.rerun_stylegan2_confirm_ok_btn.clicked.connect(self.buttonClick)
+        widgets.rerun_tstylegan2_confirm_cancel_btn.clicked.connect(self.buttonClick)
+        widgets.cancel_stylegan2_confirm_ok_btn.clicked.connect(self.buttonClick)
+        widgets.cancel_stylegan2_confirm_cancel_btn.clicked.connect(self.buttonClick)
+    # image customization widgets
+        widgets.customize_image_btn.clicked.connect(self.buttonClick)
+        widgets.save_changes_image_btn.clicked.connect(self.buttonClick)
+        widgets.apply_effects_btn.clicked.connect(self.buttonClick)
+        widgets.style_image_btn.clicked.connect(self.buttonClick)
+        widgets.contrast_image_btn.clicked.connect(self.buttonClick)
+        widgets.draw_image_btn.clicked.connect(self.buttonClick)
+        widgets.crop_image_btn.clicked.connect(self.buttonClick)
+        widgets.translate_image_btn.clicked.connect(self.buttonClick)
+        widgets.edge_detect_image_btn.clicked.connect(self.buttonClick)
+        widgets.rotate_image_btn.clicked.connect(self.buttonClick)
+        widgets.half_brightness_btn.clicked.connect(self.buttonClick)
+        widgets.double_brightness_btn.clicked.connect(self.buttonClick)
+        widgets.zero_sharpness_btn.clicked.connect(self.buttonClick)
+        widgets.double_sharpness_btn.clicked.connect(self.buttonClick)
+        widgets.half_contrast_btn.clicked.connect(self.buttonClick)
+        widgets.double_contrast_btn.clicked.connect(self.buttonClick)
+        widgets.half_color_btn.clicked.connect(self.buttonClick)
+        widgets.double_color_btn.clicked.connect(self.buttonClick)
+        widgets.mean_filter_btn.clicked.connect(self.buttonClick)
+        widgets.median_filter_btn.clicked.connect(self.buttonClick)
+        widgets.gaussian_filter_btn.clicked.connect(self.buttonClick)
+        widgets.bilateral_filter_btn.clicked.connect(self.buttonClick)
+
+
+        widgets.select_style_img_btn.clicked.connect(self.buttonClick)
+        widgets.back_to_img_custom_btn.clicked.connect(self.buttonClick)
+        widgets.open_cutomized_image_btn.clicked.connect(self.buttonClick)
+        widgets.open_cutomized_image_btn_2.clicked.connect(self.buttonClick)
+        widgets.open_cutomized_image_btn_3.clicked.connect(self.buttonClick)
+        widgets.open_cutomized_image_btn_4.clicked.connect(self.buttonClick)
+
+        widgets.open_cutomized_image_btn_5.clicked.connect(self.buttonClick)
+        widgets.open_cutomized_image_btn_6.clicked.connect(self.buttonClick)
+        widgets.open_cutomized_image_btn_7.clicked.connect(self.buttonClick)
+        widgets.open_cutomized_image_btn_8.clicked.connect(self.buttonClick)
+
+        widgets.apply_mask_btn.clicked.connect(self.buttonClick)
+        widgets.blend_image_btn.clicked.connect(self.buttonClick)
+        widgets.style_img_result_btn.clicked.connect(self.buttonClick)
+        widgets.style_img_result_cross_btn.clicked.connect(self.buttonClick)
+        widgets.translated_image_btn.clicked.connect(self.buttonClick)
+        widgets.translate_new_btn.clicked.connect(self.buttonClick)
+
+
+
+        widgets.use_pen_btn.clicked.connect(self.buttonClick)
+        widgets.use_brush_btn.clicked.connect(self.buttonClick)
+        widgets.bitwise_or_btn.clicked.connect(self.buttonClick)
+        widgets.bitwise_and_btn.clicked.connect(self.buttonClick)
+        widgets.bitwise_xor_btn.clicked.connect(self.buttonClick)
+        widgets.bitwise_not_btn.clicked.connect(self.buttonClick)
+        widgets.blacknwhite_btn.clicked.connect(self.buttonClick)
+        widgets.detect_edges_2_btn.clicked.connect(self.buttonClick)
+        widgets.detect_edges_5_btn.clicked.connect(self.buttonClick)
+        widgets.detect_rough_edges_btn.clicked.connect(self.buttonClick)
+        widgets.apply_crop_btn.clicked.connect(self.buttonClick)
+        widgets.apply_translation_btn.clicked.connect(self.buttonClick)
+        widgets.store_image_btn.clicked.connect(self.buttonClick)
+        widgets.changes_success_ok_btn.clicked.connect(self.buttonClick)
+        widgets.store_success_ok_btn.clicked.connect(self.buttonClick)
+        widgets.reset_changes_image_btn.clicked.connect(self.buttonClick)
+        widgets.changes_reset_ok_btn.clicked.connect(self.buttonClick)
 
         # Hiding the Gadgets Widgets in the Start Before Login
         widgets.edit_dst_btn.hide()
@@ -422,6 +549,14 @@ class MainWindow(QMainWindow):
         self.ui.horizontalScrollBar.setStyleSheet("background-color: #6272a4;")
         self.ui.verticalScrollBar.setStyleSheet("background-color: #6272a4;")
         self.ui.commandLinkButton.setStyleSheet("color: #ff79c6;")
+
+    # Function for the Conversion of QImage into an opencv MAT format
+    # ///////////////////////////////////////////////////////////////
+    def QImageToCvMat(self, q_img):
+        q_img.save('temp.png', 'png')
+        mat = cv2.imread('temp.png')
+        os.remove("temp.png")
+        return mat
 
     # Function for the Conversion of Picture Data to Bytes for the Database Storage Purpose
     # ///////////////////////////////////////////////////////////////
@@ -1334,6 +1469,268 @@ class MainWindow(QMainWindow):
                         widgets.new_datset_thumbnail_2.hide()
                         widgets.new_datset_thumbnail_btn_2.hide()
 
+        if btnName == "style_gan_tab_btn":
+            if loggedIn == False:
+                widgets.stackedWidget_5.setCurrentWidget(widgets.login_first_page)
+            else:
+                widgets.stackedWidget_5.setCurrentWidget(widgets.content_page)
+                widgets.stackedWidget_content_pages.setCurrentWidget(widgets.stylegan_page)
+                if Style_Gan_Model.login_success == False:
+                    widgets.stackedWidget_stylegan.setCurrentWidget(widgets.google_account_page)
+
+        # SUBMIT GOOGLE LOGIN_FORM
+        if btnName == "login_google_btn":
+            # getting the entered user name form the login form
+            username = widgets.user_name_google.text()
+            # getting the entered user password form the login form
+            password = widgets.user_password_google.text()
+            # calling the login function to validate the login request
+            threading.Thread(target=Style_Gan_Model.sign_in_google_account, args=[self, username, password,widgets]).start()
+            #Style_Gan_Model.sign_in_google_account(self, username, password)
+            # if the login success message is returned
+            threading.Thread(target=Style_Gan_Model.login_status, args=[self,widgets]).start()
+            # Loading the GIF
+            self.google_dots_loading = QMovie(":/images/images/images/swirly-dots-to-chrome.gif")
+            widgets.login_loading_label.setMovie(self.google_dots_loading)
+            self.google_dots_loading.start()
+            widgets.login_loading_label.raise_()
+
+        # login_success_notification
+        if btnName == "login_success_ok_btn_2":
+            # removing the login success message  from the app display
+            widgets.login_success_notification_2.lower()
+            # getting the user name
+            username = widgets.user_name.text()
+
+            # finding the user by the user email
+            user = User_Profile.find_user_by_name(self, username);
+            # updating the user 'Logged in Successfully' activity in the database
+            User_Profile.update_recent_activity(self, user["name"], 'Logged in to Google Successfully', 'High', widgets)
+            Datasets.load_datasets_thumbs(self, widgets)
+
+            if self.translation_process == False:
+                # switch style gan stacked widget to models page on the screen
+                widgets.stackedWidget_stylegan.setCurrentWidget(widgets.pretrained_models_page)
+                self.human_gif = QMovie(":/images/images/images/stylegananim1.gif")
+                widgets.label_262.setMovie(self.human_gif)
+                self.human_gif.start()
+                self.anime_gif = QMovie(":/images/images/images/stylegananim2.gif")
+                widgets.label_263.setMovie(self.anime_gif)
+                self.anime_gif.start()
+            elif self.translation_process == True:
+                self.dst_gif = QMovie(":/images/images/images/loadingAnimation.gif")
+                self.tick_gif = QMovie(":/images/images/images/tick.gif")
+                self.tick = QPixmap(":/images/images/images/tick.png")
+                widgets.style_gan_plabel_4.setMovie(self.dst_gif)
+                self.tick_gif.start()
+                self.dst_gif.start()
+                widgets.stackedWidget_content_pages.setCurrentWidget(widgets.image_customization)
+                widgets.stackedWidget_img_cutom.setCurrentWidget(widgets.image_translation_process)
+                threading.Thread(target=Image_Customization.translate_images, args=[self, widgets]).start()
+        # login_fail_notification
+        if btnName == "login_fail_ok_btn_2":
+            # removing the login fail message  from the app display
+            widgets.login_fail_notification_2.lower()
+
+        if btnName == "forget_pass_name_google_btn":
+            # link to google accounts
+            webbrowser.open('https://accounts.google.com/signin/v2/identifier?hl=en&passive=true&continue=https%3A%2F%2Fwww.google.com%2F&ec=GAZAmgQ&flowName=GlifWebSignIn&flowEntry=ServiceLogin')
+
+        if btnName == "signup_google_btn":
+            Style_Gan_Model.sign_up_google_account(self)
+
+        if btnName == "google_verify_code_widget_ok_btn":
+            threading.Thread(target=Style_Gan_Model.verify_code, args=[self,widgets.google_verify_code.text(),widgets]).start()
+        #google_verify_code
+
+        if btnName == "google_verify_code_widget_cancel_btn":
+            widgets.google_verify_code_widget.lower()
+            Style_Gan_Model.driver.close()
+            widgets.login_loading_label.lower()
+
+        if btnName == "style_gan1_btn":
+            # switch style gan stacked widget to models page on the screen
+            widgets.stackedWidget_stylegan.setCurrentWidget(widgets.stylegan1_page)
+
+        if btnName == "style_gan2_btn":
+            # switch style gan stacked widget to models page on the screen
+            widgets.stackedWidget_stylegan.setCurrentWidget(widgets.stylegan2_page)
+
+        if btnName == "logout_google_btn":
+            # logout from the google account
+            Style_Gan_Model.driver.close()
+            Style_Gan_Model.login_fail = False
+            Style_Gan_Model.login_success = False
+            widgets.stackedWidget_stylegan.setCurrentWidget(widgets.google_account_page)
+
+        if btnName == "train_stylegan_btn":
+            # switch style gan stacked widget to models page on the screen
+            widgets.update_algo_widget_2.raise_()
+
+        if btnName == "update_stylegan_algo_btn":
+            widgets.update_algo_widget_2.raise_()
+
+        if btnName == "update_algo_ok_btn_2":
+            key = widgets.admin_key.text()
+            match_result = User_Profile.match_admin_secret_key(self,key)
+            if match_result == 'Key Found':
+                user = widgets.user_name_2.text()
+                widgets.key_match_error_2.setText("")
+                widgets.update_algo_widget_2.lower()
+                User_Profile.update_recent_activity(self, user, "Started Algo Update",'High', widgets)
+                #Gan_Model.update_algo(self)
+                User_Profile.update_recent_activity(self, user, "Ended Algo Update",'High', widgets)
+            elif match_result == 'Key Not Found':
+                widgets.key_match_error_2.setText("Key Not Found")
+
+        if btnName == "update_algo_cancel_btn_2":
+            widgets.update_algo_widget_2.lower()
+
+        if btnName == "back_to_models_btn_1":
+            widgets.stackedWidget_stylegan.setCurrentWidget(widgets.pretrained_models_page)
+
+        if btnName == "back_to_models_btn_2":
+            widgets.stackedWidget_stylegan.setCurrentWidget(widgets.pretrained_models_page)
+
+        if btnName == "generate_images_style1_btn":
+            if (widgets.output_size_style1.currentText()).isnumeric() == False:
+                widgets.output_size_error.raise_()
+            if widgets.runtime_env_style1.currentText() != 'GPU':
+                widgets.runtime_env_error.raise_()
+            if (widgets.output_size_style1.currentText()).isnumeric() and (widgets.runtime_env_style1.currentText()) == 'GPU':
+                if Style_Gan_Model.process1_running == False:
+                    # calling the run style gan 1 algo to generate images of high quality
+                    dataset = Style_Gan_Model.selected_dataset(self,widgets)
+                    self.dst_gif = QMovie(":/images/images/images/loadingAnimation.gif")
+                    self.tick_gif = QMovie(":/images/images/images/tick.gif")
+                    self.tick = QPixmap(":/images/images/images/tick.png")
+                    widgets.loading_label_dst.setMovie(self.dst_gif)
+                    widgets.label_264.setMovie(self.human_gif)
+                    self.tick_gif.start()
+                    self.dst_gif.start()
+                    threading.Thread(target=Style_Gan_Model.run_style_gan1, args=[self, abs(int((widgets.output_size_style1.currentText()))), dataset,widgets]).start()
+                    widgets.stackedWidget_stylegan.setCurrentWidget(widgets.stylegan1_progress_page)
+                    widgets.output_size_error.lower()
+                    widgets.runtime_env_error.lower()
+                else:
+                    widgets.stackedWidget_stylegan.setCurrentWidget(widgets.stylegan1_progress_page)
+                    widgets.output_size_error.lower()
+                    widgets.runtime_env_error.lower()
+
+        if btnName == "view_style1_generated_imgs_btn":
+            Style_Gan_Model.store_stylegan1_outputs(self)
+
+        if btnName == "rerun_style1gan_btn":
+            widgets.rerun_stylegan1_confirm_widget.raise_()
+
+        if btnName == "rerun_stylegan1_confirm_ok_btn":
+            widgets.rerun_stylegan1_confirm_widget.lower()
+            dataset = Style_Gan_Model.selected_dataset(self, widgets)
+            self.dst_gif = QMovie(":/images/images/images/loadingAnimation.gif")
+            self.tick_gif = QMovie(":/images/images/images/tick.gif")
+            self.tick = QPixmap(":/images/images/images/tick.png")
+            widgets.loading_label_dst.setMovie(self.dst_gif)
+            widgets.label_264.setMovie(self.human_gif)
+            self.tick_gif.start()
+            self.dst_gif.start()
+            Style_Gan_Model.refresh_with_alert(Style_Gan_Model.driver)
+            threading.Thread(target=Style_Gan_Model.run_style_gan1,
+                             args=[self, abs(int((widgets.output_size_style1.currentText()))), dataset,
+                                   widgets]).start()
+            widgets.stackedWidget_stylegan.setCurrentWidget(widgets.stylegan1_progress_page)
+            widgets.output_size_error.lower()
+            widgets.runtime_env_error.lower()
+
+        if btnName == "rerun_stylegan1_confirm_cancel_btn":
+            widgets.rerun_stylegan1_confirm_widget.lower()
+
+        if btnName == "cancel_progress_style1_btn":
+            widgets.cancel_stylegan1_confirm_widget.raise_()
+
+        if btnName == "cancel_stylegan1_confirm_ok_btn":
+            widgets.cancel_stylegan1_confirm_widget.lower()
+            # Open a new window
+            Style_Gan_Model.refresh_with_alert(Style_Gan_Model.driver)
+            widgets.stackedWidget_stylegan.setCurrentWidget(widgets.stylegan1_page)
+
+        if btnName == "cancel_stylegan1_confirm_cancel_btn":
+            widgets.cancel_stylegan1_confirm_widget.lower()
+
+        if btnName == "generate_images_style2_btn":
+            start_val = int(widgets.start_image_style2.currentText())
+            end_val = int(widgets.end_image_style2.currentText())
+
+            if (widgets.start_image_style2.currentText()).isnumeric() == False or (widgets.end_image_style2.currentText()).isnumeric() == False or start_val>end_val:
+                widgets.output_size_error_2.raise_()
+
+            if widgets.runtime_env_style2.currentText() != 'GPU':
+                widgets.runtime_env_error_2.raise_()
+            if (widgets.start_image_style2.currentText()).isnumeric() and (widgets.end_image_style2.currentText()).isnumeric() and (widgets.runtime_env_style1.currentText()) == 'GPU' and  start_val<end_val:
+                if Style_Gan_Model.process2_running == False:
+                    # calling the run style gan 1 algo to generate images of high quality
+                    style2_dataset = Style_Gan_Model.selected_dataset_2(self, widgets)
+                    self.dst_gif_2 = QMovie(":/images/images/images/loadingAnimation.gif")
+                    self.tick_gif_2 = QMovie(":/images/images/images/tick.gif")
+                    self.tick_2 = QPixmap(":/images/images/images/tick.png")
+                    widgets.loading_label_dst_2.setMovie(self.dst_gif_2)
+                    widgets.label_265.setMovie(self.anime_gif)
+                    self.tick_gif_2.start()
+                    self.dst_gif_2.start()
+                    threading.Thread(target=Style_Gan_Model.run_style_gan2,args=[self, abs(start_val),abs(end_val),style2_dataset,widgets]).start()
+                    widgets.stackedWidget_stylegan.setCurrentWidget(widgets.stylegan2_progress_page)
+                    widgets.output_size_error_2.lower()
+                    widgets.runtime_env_error_2.lower()
+                else:
+                    widgets.stackedWidget_stylegan.setCurrentWidget(widgets.stylegan2_progress_page)
+                    widgets.output_size_error_2.lower()
+                    widgets.runtime_env_error_2.lower()
+
+        if btnName == "view_style2_generated_imgs_btn":
+            Style_Gan_Model.store_stylegan2_outputs(self)
+
+        if btnName == "rerun_style2gan_btn":
+            widgets.rerun_stylegan2_confirm_widget.raise_()
+
+        if btnName == "rerun_stylegan2_confirm_ok_btn":
+            start_val = int(widgets.start_image_style2.currentText())
+            end_val = int(widgets.end_image_style2.currentText())
+            widgets.rerun_stylegan2_confirm_widget.lower()
+            style2_dataset = Style_Gan_Model.selected_dataset_2(self, widgets)
+            self.dst_gif_2 = QMovie(":/images/images/images/loadingAnimation.gif")
+            self.tick_gif_2 = QMovie(":/images/images/images/tick.gif")
+            self.tick_2 = QPixmap(":/images/images/images/tick.png")
+            widgets.loading_label_dst_2.setMovie(self.dst_gif_2)
+            widgets.label_265.setMovie(self.anime_gif)
+            self.tick_gif_2.start()
+            self.dst_gif_2.start()
+            Style_Gan_Model.refresh_with_alert(Style_Gan_Model.driver)
+            threading.Thread(target=Style_Gan_Model.run_style_gan2,
+                             args=[self, abs(start_val), abs(end_val), style2_dataset, widgets]).start()
+            widgets.stackedWidget_stylegan.setCurrentWidget(widgets.stylegan2_progress_page)
+            widgets.output_size_error_2.lower()
+            widgets.runtime_env_error_2.lower()
+
+        if btnName == "rerun_tstylegan2_confirm_cancel_btn":
+            widgets.rerun_stylegan2_confirm_widget.lower()
+
+        if btnName == "cancel_progress_style2_btn":
+            widgets.cancel_stylegan2_confirm_widget.raise_()
+
+        if btnName == "cancel_stylegan2_confirm_ok_btn":
+            widgets.cancel_stylegan2_confirm_widget.lower()
+            # Open a new window
+            Style_Gan_Model.refresh_with_alert(Style_Gan_Model.driver)
+            widgets.stackedWidget_stylegan.setCurrentWidget(widgets.stylegan2_page)
+
+        if btnName == "cancel_stylegan2_confirm_cancel_btn":
+            widgets.cancel_stylegan2_confirm_widget.lower()
+
+        if btnName == "back_to_style1_page_btn":
+            widgets.stackedWidget_stylegan.setCurrentWidget(widgets.stylegan1_page)
+
+        if btnName == "back_to_style2_page_btn":
+            widgets.stackedWidget_stylegan.setCurrentWidget(widgets.stylegan2_page)
+
         if btnName == "generated_images_btn":
             if loggedIn == False:
                 widgets.stackedWidget_5.setCurrentWidget(widgets.login_first_page)
@@ -1612,6 +2009,7 @@ class MainWindow(QMainWindow):
             widgets.stackedWidget_model_training.setCurrentWidget(widgets.model_train_options_page)
             widgets.label_224.setPixmap(widgets.human_thumbnail_2.pixmap())
 
+
         if btnName == "run_gan_btn":
             user = widgets.user_name.text()
             User_Profile.update_recent_activity(self, user, 'Started Training',
@@ -1815,6 +2213,253 @@ class MainWindow(QMainWindow):
 
         if btnName == "update_algo_cancel_btn":
             widgets.update_algo_widget.lower()
+
+        if btnName == "customize_image_btn":
+            self.resized_image_331 = Image_Customization.choose_image(self, widgets, 331, 331)[0]
+            self.customized_image_331 = self.resized_image_331
+            self.resized_image_array_331 = Image_Customization.choose_image(self, widgets, 331, 331)[2]
+            self.original_image = Image_Customization.choose_image(self,widgets,251,251)[1]
+            self.customized_image = self.original_image
+            self.original_image_array = Image_Customization.choose_image(self, widgets,251,251)[3]
+            widgets.stackedWidget_content_pages.setCurrentWidget(widgets.image_customization)
+            widgets.selected_image.setPixmap(QtGui.QPixmap(self.customized_image_331))
+
+        if btnName == "reset_changes_image_btn":
+            self.rotation_process = False
+            self.resized_image_331 = Image_Customization.choose_image(self, widgets, 331, 331)[0]
+            self.customized_image_331 = self.resized_image_331
+            self.resized_image_array_331 = Image_Customization.choose_image(self, widgets, 331, 331)[2]
+            self.original_image = Image_Customization.choose_image(self, widgets, 251, 251)[1]
+            self.customized_image = self.original_image
+            self.original_image_array = Image_Customization.choose_image(self, widgets, 251, 251)[3]
+            widgets.img_cutom_widget.raise_()
+            widgets.changes_reset_notification.raise_()
+
+        if btnName == "changes_reset_ok_btn":
+            widgets.stackedWidget_img_cutom.setCurrentWidget(widgets.img_custom_home)
+            widgets.selected_image.setPixmap(QtGui.QPixmap(self.customized_image_331))
+            widgets.img_cutom_widget.lower()
+            widgets.changes_reset_notification.lower()
+
+        if btnName == "apply_effects_btn":
+            widgets.stackedWidget_img_cutom.setCurrentWidget(widgets.img_filters)
+            widgets.selected_image_filter_2.setPixmap(QtGui.QPixmap(self.resized_image_331))
+
+        if btnName == "mean_filter_btn":
+            Image_Customization.apply_filters(self, "mean_filter",widgets)
+
+        if btnName == "median_filter_btn":
+            Image_Customization.apply_filters(self, "median_filter",widgets)
+
+        if btnName == "gaussian_filter_btn":
+            Image_Customization.apply_filters(self, "gaussian_filter", widgets)
+
+        if btnName == "bilateral_filter_btn":
+            Image_Customization.apply_filters(self, "bilateral_filter", widgets)
+
+        if btnName == "contrast_image_btn":
+            widgets.stackedWidget_img_cutom.setCurrentWidget(widgets.img_contrast)
+            widgets.selected_image_filter.setPixmap(QtGui.QPixmap(self.resized_image_331))
+
+        if btnName == "half_brightness_btn":
+            Image_Customization.apply_contrast_to_images(self, "brightness","half", widgets)
+
+        if btnName == "double_brightness_btn":
+            Image_Customization.apply_contrast_to_images(self, "brightness","double", widgets)
+
+        if btnName == "zero_sharpness_btn":
+            Image_Customization.apply_contrast_to_images(self, "sharpness","half", widgets)
+
+        if btnName == "double_sharpness_btn":
+            Image_Customization.apply_contrast_to_images(self, "sharpness","double", widgets)
+
+        if btnName == "half_contrast_btn":
+            Image_Customization.apply_contrast_to_images(self, "contrast","half", widgets)
+
+        if btnName == "double_contrast_btn":
+            Image_Customization.apply_contrast_to_images(self, "contrast","double", widgets)
+
+        if btnName == "half_color_btn":
+            Image_Customization.apply_contrast_to_images(self, "color","half", widgets)
+
+        if btnName == "double_color_btn":
+            Image_Customization.apply_contrast_to_images(self, "color","double", widgets)
+
+        if btnName == "style_image_btn":
+            widgets.stackedWidget_img_cutom.setCurrentWidget(widgets.img_styling)
+            widgets.selected_image_content.setPixmap(widgets.selected_image.pixmap())
+            widgets.selected_style_image.setPixmap(widgets.selected_image.pixmap())
+
+        if btnName == "select_style_img_btn":
+            Image_Customization.select_style_image(self,widgets)
+
+        if btnName == "draw_image_btn":
+            widgets.stackedWidget_img_cutom.setCurrentWidget(widgets.draw_on_image)
+            widgets.selected_image_filter_6.setPixmap(QtGui.QPixmap(self.resized_image_331))
+
+        if btnName == "use_pen_btn":
+            threading.Thread(target=DrawWindow.setmap,args=[self,"pen"]).start()
+            window = DrawWindow()
+            window.show()
+
+        if btnName == "use_brush_btn":
+            threading.Thread(target=DrawWindow.setmap, args=[self, "brush"]).start()
+            window = DrawWindow()
+            window.show()
+
+        if btnName == "crop_image_btn":
+            widgets.stackedWidget_img_cutom.setCurrentWidget(widgets.crop_image)
+            widgets.selected_image_filter_5.setPixmap(QtGui.QPixmap(self.resized_image_331))
+
+        if btnName == "apply_crop_btn":
+            threading.Thread(target=Image_Customization.crop_image,args=[self, widgets]).start()
+
+        if btnName == "translate_image_btn":
+            widgets.stackedWidget_img_cutom.setCurrentWidget(widgets.image_translation)
+
+        if btnName == "edge_detect_image_btn":
+            widgets.stackedWidget_img_cutom.setCurrentWidget(widgets.edge_detection)
+            widgets.selected_image_filter_3.setPixmap(QtGui.QPixmap(self.resized_image_331))
+
+        if btnName == "detect_edges_2_btn":
+            Image_Customization.detect_edges(self,"sigma-2",widgets)
+
+        if btnName == "detect_edges_5_btn":
+            Image_Customization.detect_edges(self, "sigma-5", widgets)
+
+        if btnName == "detect_rough_edges_btn":
+            Image_Customization.detect_edges(self, "rough", widgets)
+
+        if btnName == "rotate_image_btn":
+            widgets.stackedWidget_img_cutom.setCurrentWidget(widgets.rotate_image)
+            widgets.selected_image_filter_4.setPixmap(QtGui.QPixmap(self.resized_image_331))
+            self.rotation_process = True
+            threading.Thread(target=Image_Customization.rotate_image,
+                             args=[self,widgets]).start()
+
+        if btnName == "save_changes_image_btn":
+            Image_Customization.save_changes_on_image(self,widgets)
+
+        if btnName == "store_image_btn":
+            Image_Customization.store_customized_image(self,widgets)
+
+        if btnName == "changes_success_ok_btn":
+            widgets.img_cutom_widget.lower()
+            widgets.changes_success_notification.lower()
+
+        if btnName == "store_success_ok_btn":
+            widgets.img_cutom_widget.lower()
+            widgets.store_success_notification.lower()
+
+        if btnName == "open_cutomized_image_btn":
+            MainWindow.open_image(self, QtGui.QPixmap(self.original_image))
+
+        if btnName == "open_cutomized_image_btn_2":
+            MainWindow.open_image(self, QtGui.QPixmap(self.customized_image))
+
+        if btnName == "open_cutomized_image_btn_3":
+            MainWindow.open_image(self, QtGui.QPixmap(self.customized_image))
+
+        if btnName == "open_cutomized_image_btn_4":
+            Image_Customization.select_mask_image(self,widgets)
+
+        if btnName == "open_cutomized_image_btn_5":
+            MainWindow.open_image(self, QtGui.QPixmap(self.customized_image))
+
+        if btnName == "open_cutomized_image_btn_6":
+            MainWindow.open_image(self, QtGui.QPixmap(self.customized_image))
+
+        if btnName == "open_cutomized_image_btn_7":
+            MainWindow.open_image(self, QtGui.QPixmap(self.customized_image))
+
+        if btnName == "open_cutomized_image_btn_8":
+            MainWindow.open_image(self, QtGui.QPixmap(self.customized_image))
+
+        if btnName == "apply_mask_btn":
+            widgets.style_img_result.setPixmap(QtGui.QPixmap(self.customized_image_331))
+            widgets.style_result_label.raise_()
+            widgets.style_img_result_cross_btn.raise_()
+            widgets.style_img_result.raise_()
+            widgets.style_img_result_btn.raise_()
+            widgets.bitwise_not_btn.raise_()
+            widgets.blacknwhite_btn.raise_()
+            widgets.bitwise_or_btn.raise_()
+            widgets.bitwise_and_btn.raise_()
+            widgets.bitwise_xor_btn.raise_()
+
+        if btnName == "bitwise_or_btn":
+            Image_Customization.apply_mask(self,"or",widgets)
+
+        if btnName == "bitwise_and_btn":
+            Image_Customization.apply_mask(self, "and", widgets)
+
+        if btnName == "bitwise_xor_btn":
+            Image_Customization.apply_mask(self, "xor", widgets)
+
+        if btnName == "bitwise_not_btn":
+            Image_Customization.apply_mask(self, "not", widgets)
+
+        if btnName == "blacknwhite_btn":
+            Image_Customization.apply_mask(self, "black_white", widgets)
+
+        if btnName == "blend_image_btn":
+            widgets.style_result_label.raise_()
+            widgets.style_img_result_cross_btn.raise_()
+            widgets.style_img_result.raise_()
+            widgets.style_img_result_btn.raise_()
+            widgets.blend_image_slider.raise_()
+            widgets.label_291.raise_()
+            widgets.label_290.raise_()
+            self.blending = True
+            threading.Thread(target=Image_Customization.blend_images,
+                             args=[self, widgets]).start()
+
+        if btnName == "style_img_result_btn":
+            MainWindow.open_image(self, QtGui.QPixmap(self.customized_image))
+
+        if btnName == "style_img_result_cross_btn":
+            self.blending = False
+            self.blender_image_331 = self.customized_image_331
+            self.blender_image = self.customized_image
+            self.mask_image_331 = self.customized_image_331
+            self.mask_image = self.customized_image
+            self.customized_image_331 = self.resized_image_331
+            self.customized_image = self.original_image
+            widgets.style_img_result_cross_btn.lower()
+            widgets.style_img_result.lower()
+            widgets.style_img_result_btn.lower()
+            widgets.blend_image_slider.lower()
+            widgets.label_291.lower()
+            widgets.label_290.lower()
+            widgets.style_result_label.lower()
+            widgets.bitwise_or_btn.lower()
+            widgets.bitwise_and_btn.lower()
+            widgets.bitwise_xor_btn.lower()
+            widgets.bitwise_not_btn.lower()
+            widgets.blacknwhite_btn.lower()
+
+        if btnName == "translated_image_btn":
+            MainWindow.open_image(self, QtGui.QPixmap(self.customized_image))
+
+        if btnName == "translate_new_btn":
+            self.translation_process = True
+            widgets.stackedWidget_content_pages.setCurrentWidget(widgets.stylegan_page)
+            widgets.stackedWidget_stylegan.setCurrentWidget(widgets.google_account_page)
+
+        if btnName == "apply_translation_btn":
+            self.translation_process = True
+            widgets.stackedWidget_content_pages.setCurrentWidget(widgets.stylegan_page)
+            widgets.stackedWidget_stylegan.setCurrentWidget(widgets.google_account_page)
+
+        if btnName == "back_to_img_custom_btn":
+            if widgets.stackedWidget_img_cutom.currentWidget() == widgets.img_custom_home:
+                widgets.stackedWidget_content_pages.setCurrentWidget(widgets.generated_images_page)
+            else:
+                self.rotation_process = False
+                widgets.stackedWidget_img_cutom.setCurrentWidget(widgets.img_custom_home)
+                widgets.selected_image.setPixmap(QtGui.QPixmap(self.resized_image_331))
+                self.customized_image_331 = self.resized_image_331
+                self.customized_image = self.original_image
 
         # Print Pressed Button
         print(f'Button "{btnName}" pressed!')
