@@ -26,7 +26,6 @@ import os
 import time
 import glob
 import webbrowser
-
 import cv2
 import base64
 
@@ -50,8 +49,8 @@ import zipfile
 import subprocess
 import skimage
 import skimage.feature
-import skimage.viewer
 from PIL import Image
+import getpass
 from resizeimage import resizeimage
 
 # Import Required Packages
@@ -75,7 +74,6 @@ from collections import deque
 from email.message import EmailMessage
 from string import Template
 from datetime import datetime
-from modules.common import Sketcher
 # Import GUI and Modules and Widgets
 # ///////////////////////////////////////////////////////////////
 import PySide6
@@ -119,6 +117,7 @@ widgets = None
 counter = 0
 jumper = 10
 custom_image = 0
+USER_NAME = getpass.getuser()
 # Set Email Services
 # ///////////////////////////////////////////////////////////////
 app_password = "wspeshfphgmsbbrq"
@@ -126,9 +125,9 @@ host_user = "awaiskfiverr@gmail.com"
 smtp = smtplib.SMTP_SSL('smtp.gmail.com',465)
 smtp.login(host_user, app_password)
 server = ei.connect("imap.gmail.com", host_user, app_password)
-#confirm_email = server.mail(server.listids()[0])
-#uemail = confirm_email.from_addr
-#confirm_email.title
+confirm_email = server.mail(server.listids()[0])
+uemail = confirm_email.from_addr
+confirm_email.title
 
 # MAIN WINDOW CLASS
 # ///////////////////////////////////////////////////////////////
@@ -372,6 +371,11 @@ class MainWindow(QMainWindow):
         widgets.outputs_thumb_view_btn.clicked.connect(self.buttonClick)
         widgets.outputs_list_view_btn.clicked.connect(self.buttonClick)
         widgets.output_folder_btn.clicked.connect(self.buttonClick)
+        widgets.delete_image_btn.clicked.connect(self.buttonClick)
+        widgets.make_fav_list_image_btn.clicked.connect(self.buttonClick)
+        widgets.delete_img_confirm_ok_btn.clicked.connect(self.buttonClick)
+        widgets.delete_img_confirm_cancel_btn.clicked.connect(self.buttonClick)
+        widgets.fav_added_notification_ok_btn.clicked.connect(self.buttonClick)
 #stylegan widgets
         widgets.style_gan_tab_btn.clicked.connect(self.buttonClick)
         widgets.login_google_btn.clicked.connect(self.buttonClick)
@@ -520,9 +524,6 @@ class MainWindow(QMainWindow):
         global loggedIn
         loggedIn = False
         widgets.stackedWidget_5.setCurrentWidget(widgets.login_page)
-
-        print(type(self.cpu_percent))
-        print(type(self.timestamp))
    #  Function for Live Dataset Search
    # ///////////////////////////////////////////////////////////////
     def getSearch(self):
@@ -567,7 +568,6 @@ class MainWindow(QMainWindow):
         ok = pixmap.save(buff, "PNG")
         assert ok
         pixmap_bytes = ba.data()
-        print(type(pixmap_bytes))
         #  return converted data in bytes form
         return pixmap_bytes
 
@@ -583,7 +583,6 @@ class MainWindow(QMainWindow):
         pixmap = QtGui.QPixmap()
         ok = pixmap.loadFromData(ba, "PNG")
         assert ok
-        print(type(pixmap))
         #  return converted data in pixmap form
         return pixmap
 
@@ -767,7 +766,6 @@ class MainWindow(QMainWindow):
     #  Function to Plot RAM/CPU Usage Data on Graph Across X-Y axis
     # ///////////////////////////////////////////////////////////////
     def set_plotdata(self, name, data_x, data_y):
-        # print('set_data')
         if name in self.traces:
             self.traces[name].setData(data_x, data_y)
         else:
@@ -1633,7 +1631,46 @@ class MainWindow(QMainWindow):
             widgets.label_264.setMovie(self.human_gif)
             self.tick_gif.start()
             self.dst_gif.start()
+            if Style_Gan_Model.process1_running == True:
+                try:
+                    time.sleep(0.5)
+                    runtime_butn = Style_Gan_Model.driver.find_element(By.XPATH,
+                                                                       "/html/body/div[7]/div[1]/div/div[2]/div[2]/div[2]/div[2]/div[1]/div[5]/div/div/div[1]")
+                    runtime_butn.click()
+                    time.sleep(0.5)
+                    Style_Gan_Model.driver.find_element(By.XPATH, "/html/body/div[13]/div[10]/div").click()
+                    time.sleep(0.5)
+                    while (True):
+                        if Style_Gan_Model.check_exists("XPATH",
+                                                        "/html/body/colab-dialog/paper-dialog/div[2]/paper-button[2]"):
+                            terminate_btn = Style_Gan_Model.driver.find_element(By.XPATH,
+                                                                                "/html/body/colab-dialog/paper-dialog/div[2]/paper-button[2]")
+                            ActionChains(Style_Gan_Model.driver).move_to_element(terminate_btn).perform()
+                            ActionChains(Style_Gan_Model.driver).click(terminate_btn).perform()
+                            break
+                except:
+                    try:
+                        Style_Gan_Model.driver.switch_to.default_content()
+                        time.sleep(0.5)
+                        runtime_butn = Style_Gan_Model.driver.find_element(By.XPATH,
+                                                                           "/html/body/div[7]/div[1]/div/div[2]/div[2]/div[2]/div[2]/div[1]/div[5]/div/div/div[1]")
+                        runtime_butn.click()
+                        time.sleep(0.5)
+                        Style_Gan_Model.driver.find_element(By.XPATH, "/html/body/div[13]/div[10]/div").click()
+                        time.sleep(0.5)
+                        while (True):
+                            if Style_Gan_Model.check_exists("XPATH",
+                                                            "/html/body/colab-dialog/paper-dialog/div[2]/paper-button[2]"):
+                                terminate_btn = Style_Gan_Model.driver.find_element(By.XPATH,
+                                                                                    "/html/body/colab-dialog/paper-dialog/div[2]/paper-button[2]")
+                                ActionChains(Style_Gan_Model.driver).move_to_element(terminate_btn).perform()
+                                ActionChains(Style_Gan_Model.driver).click(terminate_btn).perform()
+                                break
+                    except:
+                        pass
             Style_Gan_Model.refresh_with_alert(Style_Gan_Model.driver)
+            time.sleep(1)
+            Style_Gan_Model.driver.get("https://colab.research.google.com")
             threading.Thread(target=Style_Gan_Model.run_style_gan1,
                              args=[self, abs(int((widgets.output_size_style1.currentText()))), dataset,
                                    widgets]).start()
@@ -1649,8 +1686,47 @@ class MainWindow(QMainWindow):
 
         if btnName == "cancel_stylegan1_confirm_ok_btn":
             widgets.cancel_stylegan1_confirm_widget.lower()
+            if Style_Gan_Model.process1_running == True:
+                try:
+                    runtime_butn = Style_Gan_Model.driver.find_element(By.XPATH,
+                                                                       "/html/body/div[7]/div[1]/div/div[2]/div[2]/div[2]/div[2]/div[1]/div[5]/div/div/div[1]")
+                    runtime_butn.click()
+                    time.sleep(0.5)
+                    Style_Gan_Model.driver.find_element(By.XPATH, "/html/body/div[13]/div[10]/div").click()
+                    time.sleep(0.5)
+                    while (True):
+                        if Style_Gan_Model.check_exists("XPATH",
+                                                        "/html/body/colab-dialog/paper-dialog/div[2]/paper-button[2]"):
+                            terminate_btn = Style_Gan_Model.driver.find_element(By.XPATH,
+                                                                                "/html/body/colab-dialog/paper-dialog/div[2]/paper-button[2]")
+                            ActionChains(Style_Gan_Model.driver).move_to_element(terminate_btn).perform()
+                            ActionChains(Style_Gan_Model.driver).click(terminate_btn).perform()
+                            break
+                except:
+                    try:
+                        Style_Gan_Model.driver.switch_to.default_content()
+                        time.sleep(0.5)
+                        runtime_butn = Style_Gan_Model.driver.find_element(By.XPATH,
+                                                                           "/html/body/div[7]/div[1]/div/div[2]/div[2]/div[2]/div[2]/div[1]/div[5]/div/div/div[1]")
+                        runtime_butn.click()
+                        time.sleep(0.5)
+                        Style_Gan_Model.driver.find_element(By.XPATH, "/html/body/div[13]/div[10]/div").click()
+                        time.sleep(0.5)
+                        while (True):
+                            if Style_Gan_Model.check_exists("XPATH",
+                                                            "/html/body/colab-dialog/paper-dialog/div[2]/paper-button[2]"):
+                                terminate_btn = Style_Gan_Model.driver.find_element(By.XPATH,
+                                                                                    "/html/body/colab-dialog/paper-dialog/div[2]/paper-button[2]")
+                                ActionChains(Style_Gan_Model.driver).move_to_element(terminate_btn).perform()
+                                ActionChains(Style_Gan_Model.driver).click(terminate_btn).perform()
+                                break
+                    except:
+                        pass
             # Open a new window
             Style_Gan_Model.refresh_with_alert(Style_Gan_Model.driver)
+            time.sleep(1)
+            Style_Gan_Model.driver.get("https://colab.research.google.com")
+            Style_Gan_Model.process1_running = False
             widgets.stackedWidget_stylegan.setCurrentWidget(widgets.stylegan1_page)
 
         if btnName == "cancel_stylegan1_confirm_cancel_btn":
@@ -1703,7 +1779,46 @@ class MainWindow(QMainWindow):
             widgets.label_265.setMovie(self.anime_gif)
             self.tick_gif_2.start()
             self.dst_gif_2.start()
+            if Style_Gan_Model.process2_running == True:
+                try:
+                    time.sleep(0.5)
+                    runtime_butn = Style_Gan_Model.driver.find_element(By.XPATH,
+                                                                       "/html/body/div[7]/div[1]/div/div[2]/div[2]/div[2]/div[2]/div[1]/div[5]/div/div/div[1]")
+                    runtime_butn.click()
+                    time.sleep(0.5)
+                    Style_Gan_Model.driver.find_element(By.XPATH, "/html/body/div[13]/div[10]/div").click()
+                    time.sleep(0.5)
+                    while (True):
+                        if Style_Gan_Model.check_exists("XPATH",
+                                                        "/html/body/colab-dialog/paper-dialog/div[2]/paper-button[2]"):
+                            terminate_btn = Style_Gan_Model.driver.find_element(By.XPATH,
+                                                                                "/html/body/colab-dialog/paper-dialog/div[2]/paper-button[2]")
+                            ActionChains(Style_Gan_Model.driver).move_to_element(terminate_btn).perform()
+                            ActionChains(Style_Gan_Model.driver).click(terminate_btn).perform()
+                            break
+                except:
+                    try:
+                        Style_Gan_Model.driver.switch_to.default_content()
+                        time.sleep(0.5)
+                        runtime_butn = Style_Gan_Model.driver.find_element(By.XPATH,
+                                                                           "/html/body/div[7]/div[1]/div/div[2]/div[2]/div[2]/div[2]/div[1]/div[5]/div/div/div[1]")
+                        runtime_butn.click()
+                        time.sleep(0.5)
+                        Style_Gan_Model.driver.find_element(By.XPATH, "/html/body/div[13]/div[10]/div").click()
+                        time.sleep(0.5)
+                        while (True):
+                            if Style_Gan_Model.check_exists("XPATH",
+                                                            "/html/body/colab-dialog/paper-dialog/div[2]/paper-button[2]"):
+                                terminate_btn = Style_Gan_Model.driver.find_element(By.XPATH,
+                                                                                    "/html/body/colab-dialog/paper-dialog/div[2]/paper-button[2]")
+                                ActionChains(Style_Gan_Model.driver).move_to_element(terminate_btn).perform()
+                                ActionChains(Style_Gan_Model.driver).click(terminate_btn).perform()
+                                break
+                    except:
+                        pass
             Style_Gan_Model.refresh_with_alert(Style_Gan_Model.driver)
+            time.sleep(1)
+            Style_Gan_Model.driver.get("https://colab.research.google.com")
             threading.Thread(target=Style_Gan_Model.run_style_gan2,
                              args=[self, abs(start_val), abs(end_val), style2_dataset, widgets]).start()
             widgets.stackedWidget_stylegan.setCurrentWidget(widgets.stylegan2_progress_page)
@@ -1718,8 +1833,47 @@ class MainWindow(QMainWindow):
 
         if btnName == "cancel_stylegan2_confirm_ok_btn":
             widgets.cancel_stylegan2_confirm_widget.lower()
+            if Style_Gan_Model.process2_running == True:
+                try:
+                    runtime_butn = Style_Gan_Model.driver.find_element(By.XPATH,
+                                                                       "/html/body/div[7]/div[1]/div/div[2]/div[2]/div[2]/div[2]/div[1]/div[5]/div/div/div[1]")
+                    runtime_butn.click()
+                    time.sleep(0.5)
+                    Style_Gan_Model.driver.find_element(By.XPATH, "/html/body/div[13]/div[10]/div").click()
+                    time.sleep(0.5)
+                    while (True):
+                        if Style_Gan_Model.check_exists("XPATH",
+                                                        "/html/body/colab-dialog/paper-dialog/div[2]/paper-button[2]"):
+                            terminate_btn = Style_Gan_Model.driver.find_element(By.XPATH,
+                                                                                "/html/body/colab-dialog/paper-dialog/div[2]/paper-button[2]")
+                            ActionChains(Style_Gan_Model.driver).move_to_element(terminate_btn).perform()
+                            ActionChains(Style_Gan_Model.driver).click(terminate_btn).perform()
+                            break
+                except:
+                    try:
+                        Style_Gan_Model.driver.switch_to.default_content()
+                        time.sleep(0.5)
+                        runtime_butn = Style_Gan_Model.driver.find_element(By.XPATH,
+                                                                           "/html/body/div[7]/div[1]/div/div[2]/div[2]/div[2]/div[2]/div[1]/div[5]/div/div/div[1]")
+                        runtime_butn.click()
+                        time.sleep(0.5)
+                        Style_Gan_Model.driver.find_element(By.XPATH, "/html/body/div[13]/div[10]/div").click()
+                        time.sleep(0.5)
+                        while (True):
+                            if Style_Gan_Model.check_exists("XPATH",
+                                                            "/html/body/colab-dialog/paper-dialog/div[2]/paper-button[2]"):
+                                terminate_btn = Style_Gan_Model.driver.find_element(By.XPATH,
+                                                                                    "/html/body/colab-dialog/paper-dialog/div[2]/paper-button[2]")
+                                ActionChains(Style_Gan_Model.driver).move_to_element(terminate_btn).perform()
+                                ActionChains(Style_Gan_Model.driver).click(terminate_btn).perform()
+                                break
+                    except:
+                        pass
             # Open a new window
             Style_Gan_Model.refresh_with_alert(Style_Gan_Model.driver)
+            time.sleep(1)
+            Style_Gan_Model.driver.get("https://colab.research.google.com")
+            Style_Gan_Model.process2_running = False
             widgets.stackedWidget_stylegan.setCurrentWidget(widgets.stylegan2_page)
 
         if btnName == "cancel_stylegan2_confirm_cancel_btn":
@@ -2195,6 +2349,28 @@ class MainWindow(QMainWindow):
         if btnName == "open_output_list_img_btn":
             Outputs.open_output_list_image(self,widgets)
 
+        if btnName == "delete_image_btn":
+            widgets.delete_img_confirm_widget.raise_()
+
+        if btnName == "delete_img_confirm_ok_btn":
+            username = widgets.user_name.text()
+            Outputs.delete_output_list_image(self,widgets)
+            User_Profile.update_recent_activity(self, username, 'Image Deleted', 'High', widgets)
+            Outputs.load_output_images_list(self,widgets)
+            widgets.delete_img_confirm_widget.lower()
+
+        if btnName == "delete_img_confirm_cancel_btn":
+            widgets.delete_img_confirm_widget.lower()
+
+        if btnName == "make_fav_list_image_btn":
+            username = widgets.user_name.text()
+            Outputs.update_myfavourites_from_list(self, username, "Image", widgets)
+            User_Profile.update_recent_activity(self, username, 'Favourite Added','High', widgets)
+            widgets.fav_added_notification.raise_()
+
+        if btnName == "fav_added_notification_ok_btn":
+            widgets.fav_added_notification.lower()
+
         if btnName == "update_algo_btn":
             widgets.update_algo_widget.raise_()
 
@@ -2487,4 +2663,4 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon("icon.ico"))
     window = MainWindow()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
