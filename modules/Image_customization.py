@@ -478,7 +478,7 @@ class Image_Customization(MainWindow):
         widgets.style_img_result.setPixmap(QtGui.QPixmap(self.customized_image_331))
 
     def translate_images(self,widgets):
-        widgets.style_gan_plabel_5.setPixmap('')
+        widgets.style_gan_plabel_5.clear()
         handle_of_the_window = Style_Gan_Model.driver.current_window_handle
         Style_Gan_Model.driver.switch_to.window(handle_of_the_window)
         time.sleep(0.5)
@@ -673,11 +673,18 @@ class Image_Customization(MainWindow):
             if Style_Gan_Model.check_exists("XPATH", "/html/body/div/div/div[2]/div/pre"):
                 try:
                     progress_1 = Style_Gan_Model.driver.find_element(By.XPATH,"/html/body/div/div/div[2]/div/pre").text
+                    # using regx to get digit characters
+                    res1 = ""
+                    K = 2
+                    temp = re.search('\d{% s}' % K, progress_1)
+                    res1 = (temp.group(0) if temp else '')
                 except:
                     pass
-                widgets.phase1_label.setText(
-                    f'<html><head/><body><p align="center"><span style=" font-size:14pt; font-weight:700; color:#ff0000;">NOTE: </span><span style=" font-size:14pt;">{progress_1} </span></p></body></html>')
-
+                try:
+                    widgets.phase1_label.setText(
+                        f'<html><head/><body><p align="center"><span style=" font-size:14pt; font-weight:700;">{res1} % Done</span></p></body></html>')
+                except:
+                    pass
                 time.sleep(1)
                 if re.search("1000", progress_1):
                     break
@@ -703,10 +710,18 @@ class Image_Customization(MainWindow):
             if Style_Gan_Model.check_exists("XPATH", "/html/body/div/div/div[2]/div/pre"):
                 try:
                     progress_2 = Style_Gan_Model.driver.find_element(By.XPATH,"/html/body/div/div/div[2]/div/pre").text
+                    # using regx to get digit characters
+                    res2 = ""
+                    K = 2
+                    temp = re.search('\d{% s}' % K, progress_2)
+                    res2 = (temp.group(0) if temp else '')
                 except:
                     pass
-                widgets.phase2_label.setText(
-                    f'<html><head/><body><p align="center"><span style=" font-size:14pt; font-weight:700; color:#ff0000;">NOTE: </span><span style=" font-size:14pt;">{progress_2} </span></p></body></html>')
+                try:
+                    widgets.phase2_label.setText(
+                        f'<html><head/><body><p align="center"><span style=" font-size:14pt; font-weight:700;">{res2} % Done</span></p></body></html>')
+                except:
+                    pass
                 time.sleep(1)
                 if re.search("1000", progress_2):
                     break
@@ -754,7 +769,7 @@ class Image_Customization(MainWindow):
             "/html/body/div[7]/div[2]/div[1]/colab-tab-layout-container/colab-tab/div/colab-shaded-scroller/div/div[1]/div/div[2]/div[80]/div[2]/div[2]/div[1]/div[1]/div/colab-run-button").click()
 
         Image_Customization.store_translated_image(self)
-
+        time.sleep(3)
         for gen_image in output_images.find({"name": "stylized-image.png"}):
                 # load image from the pickle module
                 image = pickle.loads(gen_image["image"])
@@ -781,17 +796,20 @@ class Image_Customization(MainWindow):
         Style_Gan_Model.driver.switch_to.window(handle_of_the_window)
         time.sleep(0.5)
         runtime_butn = Style_Gan_Model.driver.find_element(By.XPATH,
-                                                           "/html/body/div[7]/div[1]/div/div[2]/div[2]/div[2]/div[2]/div[1]/div[5]")
+                                                           "/html/body/div[7]/div[1]/div/div[2]/div[2]/div[2]/div[2]/div[1]/div[5]/div/div/div[1]")
         runtime_butn.click()
-        time.sleep(2)
         Style_Gan_Model.driver.switch_to.window(handle_of_the_window)
         time.sleep(0.5)
-        manage_sess = Style_Gan_Model.driver.find_element(By.XPATH, "/html/body/div[7]/div[1]/div/div[2]/div[2]/div[2]/div[2]/div[1]/div[5]/div/div/div[1]")
-        manage_sess.click()
-        time.sleep(2)
-        terminate_sess = Style_Gan_Model.driver.find_element(By.XPATH,"/html/body/colab-dialog/paper-dialog/colab-sessions-dialog//div[2]/div[2]/div[2]/colab-session/div[5]")
-        ActionChains(Style_Gan_Model.driver).move_to_element(terminate_sess).perform()
-        ActionChains(Style_Gan_Model.driver).click(terminate_sess).perform()
+        Style_Gan_Model.driver.find_element(By.XPATH, "/html/body/div[13]/div[10]/div").click()
+        Style_Gan_Model.driver.switch_to.window(handle_of_the_window)
+        time.sleep(0.5)
+        while (True):
+            if Style_Gan_Model.check_exists("XPATH", "/html/body/colab-dialog/paper-dialog/div[2]/paper-button[2]"):
+                terminate_btn = Style_Gan_Model.driver.find_element(By.XPATH,
+                                                                    "/html/body/colab-dialog/paper-dialog/div[2]/paper-button[2]")
+                ActionChains(Style_Gan_Model.driver).move_to_element(terminate_btn).perform()
+                ActionChains(Style_Gan_Model.driver).click(terminate_btn).perform()
+                break
         time.sleep(5)
         Style_Gan_Model.driver.close()
         self.translation_process = False
@@ -800,14 +818,11 @@ class Image_Customization(MainWindow):
         # Using try/except blocks for exception handling
         # try block
         try:
-            # Getting images names
-            images_name = []
-            for file in glob.glob("C:/Users/SYS/Downloads/stylized-image.png"):
-                f_name = file.rpartition('\\')[-1]
-                images_name.append(f_name)
+            # Getting image name
+            image_name = 'stylized-image.png'
 
             # Getting images data from the output folder
-            images = [cv2.imread(file) for file in glob.glob("C:/Users/SYS/Downloads/stylized-image.png")]
+            images = [cv2.imread(file) for file in glob.glob(f"C:/Users/{USER_NAME}/Downloads/stylized-image.png")]
             print(len(images))
 
             # Getting local machine time
@@ -826,7 +841,7 @@ class Image_Customization(MainWindow):
                 # convert numpy array to Binary, store record in mongodb
                 rec = Binary(pickle.dumps(images[i], protocol=i % 6))
                 # storing the output image in the database collection with date time stamp
-                output_images.insert_one({"image": rec, "name": images_name[i], "generated_at": date_time})
+                output_images.insert_one({"image": rec, "name": image_name, "generated_at": date_time})
             # return stored success
             return "outputs stored success"
         # except block

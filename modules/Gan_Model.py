@@ -259,12 +259,12 @@ class Gan_Model(MainWindow):
 
             # Getting images names
             images_name = []
-            for file in glob.glob("C:/Users/SYS/Downloads/AI Images/generated*.png"):
+            for file in glob.glob(f"C:/Users/{USER_NAME}/Downloads/AI Images/generated*.png"):
                 f_name = file.rpartition('\\')[-1]
                 images_name.append(f_name)
 
             # Getting images data from the output folder
-            images = [cv2.imread(file) for file in glob.glob("C:/Users/SYS/Downloads/AI Images/generated*.png")]
+            images = [cv2.imread(file) for file in glob.glob(f"C:/Users/{USER_NAME}/Downloads/AI Images/generated*.png")]
             print(len(images))
 
             # Getting local machine time
