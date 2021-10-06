@@ -1,16 +1,28 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'maindbVFQz.ui'
+## Form generated from reading UI file 'mainFZjVNk.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.0.4
+## Created by: Qt User Interface Compiler version 6.2.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide6.QtCore import *
-from PySide6.QtGui import *
-from PySide6.QtWidgets import *
+from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
+    QMetaObject, QObject, QPoint, QRect,
+    QSize, QTime, QUrl, Qt)
+from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
+    QFont, QFontDatabase, QGradient, QIcon,
+    QImage, QKeySequence, QLinearGradient, QPainter,
+    QPalette, QPixmap, QRadialGradient, QTransform)
+from PySide6.QtWidgets import (QAbstractItemView, QAbstractScrollArea, QApplication, QCheckBox,
+    QComboBox, QCommandLinkButton, QFrame, QGridLayout,
+    QHBoxLayout, QHeaderView, QLCDNumber, QLabel,
+    QLineEdit, QListView, QListWidget, QListWidgetItem,
+    QMainWindow, QPlainTextEdit, QProgressBar, QPushButton,
+    QRadioButton, QScrollArea, QScrollBar, QSizePolicy,
+    QSlider, QStackedWidget, QTableWidget, QTableWidgetItem,
+    QTextEdit, QVBoxLayout, QWidget)
 
 from . resources_rc import *
 
@@ -18,12 +30,11 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(1323, 720)
+        MainWindow.resize(1185, 724)
         MainWindow.setMinimumSize(QSize(940, 560))
         self.styleSheet = QWidget(MainWindow)
         self.styleSheet.setObjectName(u"styleSheet")
         font = QFont()
-        font.setFamily(u"Segoe UI")
         font.setPointSize(10)
         font.setBold(False)
         font.setItalic(False)
@@ -578,7 +589,6 @@ class Ui_MainWindow(object):
         self.titleLeftApp.setObjectName(u"titleLeftApp")
         self.titleLeftApp.setGeometry(QRect(70, 8, 160, 20))
         font1 = QFont()
-        font1.setFamily(u"Segoe UI Semibold")
         font1.setPointSize(12)
         font1.setBold(False)
         font1.setItalic(False)
@@ -589,7 +599,6 @@ class Ui_MainWindow(object):
         self.titleLeftDescription.setGeometry(QRect(70, 27, 160, 16))
         self.titleLeftDescription.setMaximumSize(QSize(16777215, 16))
         font2 = QFont()
-        font2.setFamily(u"Segoe UI")
         font2.setPointSize(8)
         font2.setBold(False)
         font2.setItalic(False)
@@ -1031,7 +1040,6 @@ class Ui_MainWindow(object):
         self.maximizeRestoreAppBtn.setMinimumSize(QSize(28, 28))
         self.maximizeRestoreAppBtn.setMaximumSize(QSize(28, 28))
         font3 = QFont()
-        font3.setFamily(u"Segoe UI")
         font3.setPointSize(10)
         font3.setBold(False)
         font3.setItalic(False)
@@ -1479,7 +1487,6 @@ class Ui_MainWindow(object):
         self.label_2.setObjectName(u"label_2")
         self.label_2.setGeometry(QRect(220, 30, 121, 41))
         font5 = QFont()
-        font5.setFamily(u"Segoe UI")
         font5.setPointSize(10)
         font5.setBold(False)
         font5.setItalic(False)
@@ -2381,13 +2388,10 @@ class Ui_MainWindow(object):
         if (self.tableWidget_my_favourites.columnCount() < 3):
             self.tableWidget_my_favourites.setColumnCount(3)
         __qtablewidgetitem4 = QTableWidgetItem()
-        __qtablewidgetitem4.setTextAlignment(Qt.AlignCenter);
         self.tableWidget_my_favourites.setHorizontalHeaderItem(0, __qtablewidgetitem4)
         __qtablewidgetitem5 = QTableWidgetItem()
-        __qtablewidgetitem5.setTextAlignment(Qt.AlignCenter);
         self.tableWidget_my_favourites.setHorizontalHeaderItem(1, __qtablewidgetitem5)
         __qtablewidgetitem6 = QTableWidgetItem()
-        __qtablewidgetitem6.setTextAlignment(Qt.AlignCenter);
         self.tableWidget_my_favourites.setHorizontalHeaderItem(2, __qtablewidgetitem6)
         self.tableWidget_my_favourites.setObjectName(u"tableWidget_my_favourites")
         self.tableWidget_my_favourites.setGeometry(QRect(40, 40, 611, 151))
@@ -4211,7 +4215,6 @@ class Ui_MainWindow(object):
         self.dataset_processing_bar.setObjectName(u"dataset_processing_bar")
         self.dataset_processing_bar.setGeometry(QRect(410, 80, 271, 41))
         font6 = QFont()
-        font6.setFamily(u"Segoe UI")
         font6.setPointSize(12)
         font6.setBold(True)
         font6.setItalic(False)
@@ -5577,8 +5580,8 @@ class Ui_MainWindow(object):
         self.back_to_style1_page_btn.setObjectName(u"back_to_style1_page_btn")
         self.back_to_style1_page_btn.setGeometry(QRect(170, 10, 51, 41))
         self.back_to_style1_page_btn.setCursor(QCursor(Qt.PointingHandCursor))
-        self.style_gan_plabel.raise_()
         self.cancel_stylegan1_confirm_widget.raise_()
+        self.style_gan_plabel.raise_()
         self.rerun_stylegan1_confirm_widget.raise_()
         self.label_288.raise_()
         self.rerun_style1gan_btn.raise_()
@@ -6231,16 +6234,13 @@ class Ui_MainWindow(object):
         if (self.tableWidget_generated_images.columnCount() < 3):
             self.tableWidget_generated_images.setColumnCount(3)
         __qtablewidgetitem7 = QTableWidgetItem()
-        __qtablewidgetitem7.setTextAlignment(Qt.AlignCenter);
         self.tableWidget_generated_images.setHorizontalHeaderItem(0, __qtablewidgetitem7)
         __qtablewidgetitem8 = QTableWidgetItem()
-        __qtablewidgetitem8.setTextAlignment(Qt.AlignCenter);
         self.tableWidget_generated_images.setHorizontalHeaderItem(1, __qtablewidgetitem8)
         __qtablewidgetitem9 = QTableWidgetItem()
-        __qtablewidgetitem9.setTextAlignment(Qt.AlignCenter);
         self.tableWidget_generated_images.setHorizontalHeaderItem(2, __qtablewidgetitem9)
         self.tableWidget_generated_images.setObjectName(u"tableWidget_generated_images")
-        self.tableWidget_generated_images.setGeometry(QRect(10, 20, 611, 301))
+        self.tableWidget_generated_images.setGeometry(QRect(10, 20, 611, 281))
         self.tableWidget_generated_images.viewport().setProperty("cursor", QCursor(Qt.PointingHandCursor))
         self.tableWidget_generated_images.setLayoutDirection(Qt.LeftToRight)
         self.tableWidget_generated_images.setEditTriggers(QAbstractItemView.SelectedClicked)
@@ -6250,15 +6250,99 @@ class Ui_MainWindow(object):
         self.tableWidget_generated_images.horizontalHeader().setDefaultSectionSize(147)
         self.open_output_list_img_btn = QPushButton(self.output_list_view_page)
         self.open_output_list_img_btn.setObjectName(u"open_output_list_img_btn")
-        self.open_output_list_img_btn.setGeometry(QRect(470, 30, 161, 24))
+        self.open_output_list_img_btn.setGeometry(QRect(470, 23, 151, 41))
         self.open_output_list_img_btn.setCursor(QCursor(Qt.PointingHandCursor))
         self.open_output_list_img_btn.setLayoutDirection(Qt.LeftToRight)
         self.customize_image_btn = QPushButton(self.output_list_view_page)
         self.customize_image_btn.setObjectName(u"customize_image_btn")
-        self.customize_image_btn.setGeometry(QRect(460, 320, 161, 31))
+        self.customize_image_btn.setGeometry(QRect(420, 310, 161, 31))
         self.customize_image_btn.setCursor(QCursor(Qt.PointingHandCursor))
         self.customize_image_btn.setLayoutDirection(Qt.LeftToRight)
+        self.delete_image_btn = QPushButton(self.output_list_view_page)
+        self.delete_image_btn.setObjectName(u"delete_image_btn")
+        self.delete_image_btn.setGeometry(QRect(20, 310, 161, 31))
+        self.delete_image_btn.setCursor(QCursor(Qt.PointingHandCursor))
+        self.delete_image_btn.setLayoutDirection(Qt.LeftToRight)
+        self.make_fav_list_image_btn = QPushButton(self.output_list_view_page)
+        self.make_fav_list_image_btn.setObjectName(u"make_fav_list_image_btn")
+        self.make_fav_list_image_btn.setGeometry(QRect(200, 310, 201, 31))
+        self.make_fav_list_image_btn.setCursor(QCursor(Qt.PointingHandCursor))
+        self.make_fav_list_image_btn.setLayoutDirection(Qt.LeftToRight)
+        self.delete_img_confirm_widget = QWidget(self.output_list_view_page)
+        self.delete_img_confirm_widget.setObjectName(u"delete_img_confirm_widget")
+        self.delete_img_confirm_widget.setGeometry(QRect(20, 110, 561, 241))
+        self.delete_img_confirm_widget.setStyleSheet(u"background-color: rgba(0, 40, 59,240);\n"
+"border-radius:10px;")
+        self.delete_img_confirm_ok_btn = QPushButton(self.delete_img_confirm_widget)
+        self.delete_img_confirm_ok_btn.setObjectName(u"delete_img_confirm_ok_btn")
+        self.delete_img_confirm_ok_btn.setGeometry(QRect(130, 150, 151, 41))
+        self.delete_img_confirm_ok_btn.setFont(font)
+        self.delete_img_confirm_ok_btn.setCursor(QCursor(Qt.PointingHandCursor))
+        self.delete_img_confirm_ok_btn.setStyleSheet(u"QPushButton#pushButton{\n"
+"background-color:rgba(2,65,118,255);\n"
+"color:rgba(255,255,200);\n"
+"border-radius:5px;\n"
+"}\n"
+"QPushButton#pushButton::pressed{\n"
+"background-color:rgba(2,65,118,100);\n"
+"padding-left:5px;\n"
+"padding-top:5px;\n"
+"background-position:calc(100% - 10px)center;\n"
+"}\n"
+"QPushButton#pushButton::hover{\n"
+"background-color:rgba(2,65,118,200);\n"
+"}")
+        self.label_107 = QLabel(self.delete_img_confirm_widget)
+        self.label_107.setObjectName(u"label_107")
+        self.label_107.setGeometry(QRect(60, 30, 451, 41))
+        self.label_107.setAlignment(Qt.AlignCenter)
+        self.delete_img_confirm_cancel_btn = QPushButton(self.delete_img_confirm_widget)
+        self.delete_img_confirm_cancel_btn.setObjectName(u"delete_img_confirm_cancel_btn")
+        self.delete_img_confirm_cancel_btn.setGeometry(QRect(330, 150, 151, 41))
+        self.delete_img_confirm_cancel_btn.setFont(font)
+        self.delete_img_confirm_cancel_btn.setCursor(QCursor(Qt.PointingHandCursor))
+        self.delete_img_confirm_cancel_btn.setStyleSheet(u"QPushButton#pushButton{\n"
+"background-color:rgba(2,65,118,255);\n"
+"color:rgba(255,255,200);\n"
+"border-radius:5px;\n"
+"}\n"
+"QPushButton#pushButton::pressed{\n"
+"background-color:rgba(2,65,118,100);\n"
+"padding-left:5px;\n"
+"padding-top:5px;\n"
+"background-position:calc(100% - 10px)center;\n"
+"}\n"
+"QPushButton#pushButton::hover{\n"
+"background-color:rgba(2,65,118,200);\n"
+"}")
+        self.account_verify_status_21 = QLabel(self.delete_img_confirm_widget)
+        self.account_verify_status_21.setObjectName(u"account_verify_status_21")
+        self.account_verify_status_21.setGeometry(QRect(80, 80, 411, 41))
+        self.account_verify_status_21.setStyleSheet(u"color:rgb(255, 135, 87)")
+        self.account_verify_status_21.setAlignment(Qt.AlignCenter)
+        self.fav_added_notification = QWidget(self.output_list_view_page)
+        self.fav_added_notification.setObjectName(u"fav_added_notification")
+        self.fav_added_notification.setGeometry(QRect(50, 30, 551, 241))
+        self.fav_added_notification.setFont(font)
+        self.fav_added_notification.setStyleSheet(u"background-color: rgba(0, 40, 59,240);\n"
+"border-radius:10px;")
+        self.label_85 = QLabel(self.fav_added_notification)
+        self.label_85.setObjectName(u"label_85")
+        self.label_85.setGeometry(QRect(220, 30, 121, 41))
+        self.label_85.setFont(font5)
+        self.label_85.setScaledContents(False)
+        self.fav_added_notification_ok_btn = QPushButton(self.fav_added_notification)
+        self.fav_added_notification_ok_btn.setObjectName(u"fav_added_notification_ok_btn")
+        self.fav_added_notification_ok_btn.setGeometry(QRect(220, 150, 121, 41))
+        self.fav_added_notification_ok_btn.setCursor(QCursor(Qt.PointingHandCursor))
         self.generated_images_stackedWidget.addWidget(self.output_list_view_page)
+        self.fav_added_notification.raise_()
+        self.delete_img_confirm_widget.raise_()
+        self.tableWidget_generated_images.raise_()
+        self.open_output_list_img_btn.raise_()
+        self.customize_image_btn.raise_()
+        self.delete_image_btn.raise_()
+        self.make_fav_list_image_btn.raise_()
         self.no_outputs_page = QWidget()
         self.no_outputs_page.setObjectName(u"no_outputs_page")
         self.no_outputs_widget = QLabel(self.no_outputs_page)
@@ -7603,7 +7687,7 @@ class Ui_MainWindow(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(-126, 0, 218, 218))
+        self.scrollAreaWidgetContents.setGeometry(QRect(-218, 0, 218, 218))
         self.scrollAreaWidgetContents.setStyleSheet(u" QScrollBar:vertical {\n"
 "	border: none;\n"
 "    background: rgb(52, 59, 72);\n"
@@ -7693,7 +7777,6 @@ class Ui_MainWindow(object):
         if (self.tableWidget.rowCount() < 16):
             self.tableWidget.setRowCount(16)
         font7 = QFont()
-        font7.setFamily(u"Segoe UI")
         __qtablewidgetitem14 = QTableWidgetItem()
         __qtablewidgetitem14.setFont(font7);
         self.tableWidget.setVerticalHeaderItem(0, __qtablewidgetitem14)
@@ -7934,7 +8017,6 @@ class Ui_MainWindow(object):
         self.creditsLabel.setObjectName(u"creditsLabel")
         self.creditsLabel.setMaximumSize(QSize(16777215, 16))
         font8 = QFont()
-        font8.setFamily(u"Segoe UI")
         font8.setBold(False)
         font8.setItalic(False)
         self.creditsLabel.setFont(font8)
@@ -7973,7 +8055,7 @@ class Ui_MainWindow(object):
         self.stackedWidget_3.setCurrentIndex(2)
         self.listWidget_notifications.setCurrentRow(-1)
         self.stackedWidget_5.setCurrentIndex(3)
-        self.stackedWidget_content_pages.setCurrentIndex(8)
+        self.stackedWidget_content_pages.setCurrentIndex(0)
         self.datsets_stackedWidget.setCurrentIndex(0)
         self.stackedWidget_model_training.setCurrentIndex(0)
         self.stackedWidget_stylegan.setCurrentIndex(0)
@@ -8643,7 +8725,15 @@ class Ui_MainWindow(object):
         ___qtablewidgetitem9 = self.tableWidget_generated_images.horizontalHeaderItem(2)
         ___qtablewidgetitem9.setText(QCoreApplication.translate("MainWindow", u"GENERATED AT", None));
         self.open_output_list_img_btn.setText(QCoreApplication.translate("MainWindow", u"Open Selected Image", None))
-        self.customize_image_btn.setText(QCoreApplication.translate("MainWindow", u"Customize Image", None))
+        self.customize_image_btn.setText(QCoreApplication.translate("MainWindow", u"Customize Selected Image", None))
+        self.delete_image_btn.setText(QCoreApplication.translate("MainWindow", u"Delete Selected Image", None))
+        self.make_fav_list_image_btn.setText(QCoreApplication.translate("MainWindow", u"Make Favourite Selected Image", None))
+        self.delete_img_confirm_ok_btn.setText(QCoreApplication.translate("MainWindow", u"OK", None))
+        self.label_107.setText(QCoreApplication.translate("MainWindow", u"Do you want to delete the selected image?", None))
+        self.delete_img_confirm_cancel_btn.setText(QCoreApplication.translate("MainWindow", u"CANCEL", None))
+        self.account_verify_status_21.setText(QCoreApplication.translate("MainWindow", u"WARNING: Image will be permanently deleted from the database!", None))
+        self.label_85.setText(QCoreApplication.translate("MainWindow", u"LOGIN SUCCESSFUL", None))
+        self.fav_added_notification_ok_btn.setText(QCoreApplication.translate("MainWindow", u"OK", None))
         self.no_outputs_widget.setText(QCoreApplication.translate("MainWindow", u"No Output Items", None))
         self.outputs_list_view_btn.setText(QCoreApplication.translate("MainWindow", u"LIST VIEW", None))
         self.outputs_thumb_view_btn.setText(QCoreApplication.translate("MainWindow", u"THUMBNAIL VIEW", None))

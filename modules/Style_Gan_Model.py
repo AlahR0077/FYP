@@ -71,8 +71,8 @@ class Style_Gan_Model(MainWindow):
             #chrome_options.add_argument("--ignore-certificate-errors")
             #chrome_options.add_argument('--no-sandbox')
             #chrome_options.add_argument("--disable-plugins-discovery")
-            chrome_options.add_argument("--window-size=500,500")
-            chrome_options.add_argument("--window-position=980,980");
+            chrome_options.add_argument("--window-size=1000,500")
+            #chrome_options.add_argument("--window-position=980,980");
             #chrome_options.add_argument("--incognito")
             chrome_options.add_argument("user_agent=DN")
 
@@ -83,7 +83,6 @@ class Style_Gan_Model(MainWindow):
                 Style_Gan_Model.driver.get("https://accounts.google.com/o/oauth2/v2/auth/oauthchooseaccount?redirect_uri=https%3A%2F%2Fdevelopers.google.com%2Foauthplayground&prompt=consent&response_type=code&client_id=407408718192.apps.googleusercontent.com&scope=email&access_type=offline&flowName=GeneralOAuthFlow")
                 time.sleep(2)
                 handle_of_the_window = Style_Gan_Model.driver.current_window_handle
-                Style_Gan_Model.driver.minimize_window()
                 WebDriverWait(Style_Gan_Model.driver, 5).until(EC.presence_of_element_located((By.XPATH,"/html/body/div[1]/div[1]/div[2]/div/div[2]/div/div/div[2]/div/div[1]/div/form/span/section/div/div/div[1]/div/div[1]/div/div[1]/input"))).send_keys(GMAIL)
                 WebDriverWait(Style_Gan_Model.driver, 5).until(EC.presence_of_element_located((By.XPATH,"/html/body/div[1]/div[1]/div[2]/div/div[2]/div/div/div[2]/div/div[1]/div/form/span/section/div/div/div[1]/div/div[1]/div/div[1]/input"))).send_keys(Keys.RETURN)
                 #Style_Gan_Model.driver.find_element(By.XPATH,"/html/body/div[1]/div[1]/div[2]/div/div[2]/div/div/div[2]/div/div[1]/div/form/span/section/div/div/div[1]/div/div[1]/div/div[1]/input").send_keys(GMAIL)
@@ -94,12 +93,11 @@ class Style_Gan_Model(MainWindow):
                 time.sleep(0.5)
                 WebDriverWait(Style_Gan_Model.driver, 10).until(EC.presence_of_element_located((By.XPATH,"/html/body/div[1]/div[1]/div[2]/div/div[2]/div/div/div[2]/div/div[1]/div/form/span/section/div/div/div[1]/div[1]/div/div/div/div/div[1]/div/div[1]/input"))).send_keys(PASSWORD)
                 WebDriverWait(Style_Gan_Model.driver, 10).until(EC.presence_of_element_located((By.XPATH,"/html/body/div[1]/div[1]/div[2]/div/div[2]/div/div/div[2]/div/div[1]/div/form/span/section/div/div/div[1]/div[1]/div/div/div/div/div[1]/div/div[1]/input"))).send_keys(Keys.RETURN)
-                Style_Gan_Model.driver.minimize_window()
+
                 time.sleep(5)
                 Style_Gan_Model.driver.switch_to.window(handle_of_the_window)
                 time.sleep(0.5)
                 if Style_Gan_Model.check_exists("XPATH","/html/body/div[1]/div[1]/div[2]/div/div[2]/div/div/div[2]/div/div[1]/div/form/span/section/div/div/div/ul/li[5]/div"):
-                    Style_Gan_Model.driver.minimize_window()
                     global verify_acc;
                     Style_Gan_Model.verify_acc = True
                     time.sleep(2)
@@ -107,7 +105,6 @@ class Style_Gan_Model(MainWindow):
                     time.sleep(0.5)
                     verify_gaccount = Style_Gan_Model.driver.find_element(By.XPATH,"/html/body/div[1]/div[1]/div[2]/div/div[2]/div/div/div[2]/div/div[1]/div/form/span/section/div/div/div/ul/li[5]/div")
                     verify_gaccount.click()
-                    Style_Gan_Model.driver.minimize_window()
                     widgets.google_verify_code_widget_resend_btn.hide()
                     widgets.verify_code_error.hide()
                     widgets.google_verify_code_widget.raise_()
@@ -115,7 +112,6 @@ class Style_Gan_Model(MainWindow):
                 time.sleep(0.5)
                 password_error = Style_Gan_Model.check_exists("XPATH","/html/body/div[1]/div[1]/div[2]/div/div[2]/div/div/div[2]/div/div[1]/div/form/span/section/div/div/div[1]/div[2]/div[2]/span")
                 print(password_error)
-                Style_Gan_Model.driver.minimize_window()
                 if password_error:
                     global login_fail;
                     Style_Gan_Model.login_fail = True
@@ -126,7 +122,6 @@ class Style_Gan_Model(MainWindow):
                     Style_Gan_Model.driver.switch_to.window(handle_of_the_window)
                     time.sleep(0.5)
                     Style_Gan_Model.driver.find_element(By.XPATH,"/html/body/div[4]/div[1]/a")
-                    Style_Gan_Model.driver.minimize_window()
                     global login_success;
                     Style_Gan_Model.login_success = True
             except:
@@ -179,7 +174,7 @@ class Style_Gan_Model(MainWindow):
         widgets.genrated_images_count_stylegan1.display(0)
         widgets.stylegan1_hours.display(0)
         widgets.stylegan1_minutes.display(0)
-        widgets.style_gan_plabel.setPixmap('')
+        widgets.style_gan_plabel.clear()
         # Start time of run
         start_time = time.time()
         handle_of_the_window = Style_Gan_Model.driver.current_window_handle
@@ -187,9 +182,18 @@ class Style_Gan_Model(MainWindow):
         time.sleep(0.5)
         Style_Gan_Model.driver.get("https://colab.research.google.com/drive/1yv2bTNRuEXk59Vq_-Yav41JOb1-FfS4J?usp=sharing")
 
-        time.sleep(3)
-        size = Style_Gan_Model.driver.find_element(By.XPATH,"/html/body/div[7]/div[2]/div[1]/colab-tab-layout-container/colab-tab/div/colab-shaded-scroller/div/div/div/div[2]/div[12]/div[2]/div[2]/div[1]/div[2]/div/div[1]/div[2]/div[1]/div[4]/div[43]/span/span[2]")
-        size.click()
+        time.sleep(7)
+        while (True):
+            try:
+                size = Style_Gan_Model.driver.find_element(By.XPATH,"/html/body/div[7]/div[2]/div[1]/colab-tab-layout-container/colab-tab/div/colab-shaded-scroller/div/div/div/div[2]/div[12]/div[2]/div[2]/div[1]/div[2]/div/div[1]/div[2]/div[1]/div[4]/div[43]/span/span[2]")
+                size.click()
+                break
+            except:
+                Style_Gan_Model.driver.switch_to.window(handle_of_the_window)
+                time.sleep(0.5)
+                size = Style_Gan_Model.driver.find_element(By.XPATH, "/html/body/div[7]/div[2]/div[1]/colab-tab-layout-container/colab-tab/div/colab-shaded-scroller/div/div/div/div[2]/div[12]/div[2]/div[2]/div[1]/div[2]/div/div[1]/div[2]/div[1]/div[4]/div[43]/span/span[2]")
+                ActionChains(Style_Gan_Model.driver).move_to_element(size).perform()
+                ActionChains(Style_Gan_Model.driver).click(size).perform()
         Style_Gan_Model.driver.switch_to.window(handle_of_the_window)
         time.sleep(0.5)
         ActionChains(Style_Gan_Model.driver).send_keys(Keys.ARROW_RIGHT).perform()
@@ -284,20 +288,38 @@ class Style_Gan_Model(MainWindow):
             time.sleep(0.4)
             Style_Gan_Model.driver.find_element(By.XPATH, "/html/body/div[7]/div[2]/div[1]/colab-tab-layout-container/colab-tab/div/colab-shaded-scroller/div/div/div/div[2]/div[13]/div[2]/div[2]/div[2]/div[2]/div[1]/div/iron-icon[1]").click()
 
+        Style_Gan_Model.driver.switch_to.window(handle_of_the_window)
+        time.sleep(0.5)
+        runtime_butn = Style_Gan_Model.driver.find_element(By.XPATH,
+                                                           "/html/body/div[7]/div[1]/div/div[2]/div[2]/div[2]/div[2]/div[1]/div[5]/div/div/div[1]")
+        runtime_butn.click()
+        Style_Gan_Model.driver.switch_to.window(handle_of_the_window)
+        time.sleep(0.5)
+        Style_Gan_Model.driver.find_element(By.XPATH,"/html/body/div[13]/div[10]/div").click()
+        Style_Gan_Model.driver.switch_to.window(handle_of_the_window)
+        time.sleep(0.5)
+        while(True):
+            if Style_Gan_Model.check_exists("XPATH","/html/body/colab-dialog/paper-dialog/div[2]/paper-button[2]"):
+                terminate_btn = Style_Gan_Model.driver.find_element(By.XPATH,"/html/body/colab-dialog/paper-dialog/div[2]/paper-button[2]")
+                ActionChains(Style_Gan_Model.driver).move_to_element(terminate_btn).perform()
+                ActionChains(Style_Gan_Model.driver).click(terminate_btn).perform()
+                break
+
         global process1_running;
         Style_Gan_Model.process1_running = False
 
     def store_stylegan1_outputs(self):
+        path = f'C:\\Users\\{USER_NAME}\\Downloads\\AI images\\content\\stylegan\\images\\'
         if Style_Gan_Model.process1_running == True:
             print("process in progress...")
-        elif os.path.exists('C:\\Users\\SYS\\Downloads\\AI images\\content\\stylegan\\images\\'):
-            subprocess.Popen(r'explorer /open,"C:\Users\SYS\Downloads\AI images\content\stylegan\images\"')
+        elif os.path.exists(path):
+            subprocess.Popen(f'explorer /open, {path}')
         else:
-            with zipfile.ZipFile("C:\\Users\\SYS\\Downloads\\stylegan1-Images.zip", 'r') as zip_ref:
-                zip_ref.extractall("C:\\Users\\SYS\\Downloads\\AI images")
+            with zipfile.ZipFile(f"C:\\Users\\{USER_NAME}\\Downloads\\stylegan1-Images.zip", 'r') as zip_ref:
+                zip_ref.extractall(f"C:\\Users\\{USER_NAME}\\Downloads\\AI images")
             time.sleep(2)
-            os.remove("C:\\Users\\SYS\\Downloads\\stylegan1-Images.zip")
-            subprocess.Popen(r'explorer /open,"C:\Users\SYS\Downloads\AI images\content\stylegan\images\"')
+            os.remove(f"C:\\Users\\{USER_NAME}\\Downloads\\stylegan1-Images.zip")
+            subprocess.Popen(f'explorer /open, {path}')
 
     def run_style_gan2(self,starting_image_index, last_image_index,dataset,widgets):
         global driver;
@@ -307,21 +329,31 @@ class Style_Gan_Model(MainWindow):
         widgets.genrated_images_count_stylegan2.display(0)
         widgets.stylegan2_hours.display(0)
         widgets.stylegan2_minutes.display(0)
-        widgets.style_gan_plabel_2.setPixmap('')
+        widgets.style_gan_plabel_2.clear()
         # Start time of run
         start_time = time.time()
         handle_of_the_window = Style_Gan_Model.driver.current_window_handle
         Style_Gan_Model.driver.switch_to.window(handle_of_the_window)
         time.sleep(0.5)
         # Opens a new tab and switches to new tab
-        #Style_Gan_Model.driver.switch_to.new_window('tab')
         Style_Gan_Model.driver.get("https://colab.research.google.com/drive/1lUJdcFmPPaY6ZsMyF2cuO7LRC5H2XxH_?usp=sharing")
-        time.sleep(3)
+        time.sleep(7)
         Style_Gan_Model.driver.switch_to.window(handle_of_the_window)
         time.sleep(0.5)
-        first_img_no = Style_Gan_Model.driver.find_element(By.XPATH,
-            "/html/body/div[7]/div[2]/div[1]/colab-tab-layout-container/colab-tab/div/colab-shaded-scroller/div/div[1]/div/div[2]/div[8]/div[2]/div[2]/div[1]/div[2]/div/div[1]/div[2]/div[1]/div[4]/div[1]/span/span")
-        first_img_no.click()
+        while (True):
+            try:
+                first_img_no = Style_Gan_Model.driver.find_element(By.XPATH,"/html/body/div[7]/div[2]/div[1]/colab-tab-layout-container/colab-tab/div/colab-shaded-scroller/div/div[1]/div/div[2]/div[8]/div[2]/div[2]/div[1]/div[2]/div/div[1]/div[2]/div[1]/div[4]/div[1]/span/span")
+                first_img_no.click()
+                break
+            except:
+                try:
+                    Style_Gan_Model.driver.switch_to.window(handle_of_the_window)
+                    time.sleep(0.5)
+                    first_img_no = Style_Gan_Model.driver.find_element(By.XPATH,"/html/body/div[7]/div[2]/div[1]/colab-tab-layout-container/colab-tab/div/colab-shaded-scroller/div/div[1]/div/div[2]/div[8]/div[2]/div[2]/div[1]/div[2]/div/div[1]/div[2]/div[1]/div[4]/div[1]/span/span")
+                    ActionChains(Style_Gan_Model.driver).move_to_element(first_img_no).perform()
+                    ActionChains(Style_Gan_Model.driver).click(first_img_no).perform()
+                except:
+                    pass
         Style_Gan_Model.driver.switch_to.window(handle_of_the_window)
         time.sleep(0.5)
         ActionChains(Style_Gan_Model.driver).send_keys(Keys.ARROW_RIGHT).perform()
@@ -423,20 +455,38 @@ class Style_Gan_Model(MainWindow):
         Style_Gan_Model.driver.switch_to.window(handle_of_the_window)
         time.sleep(0.5)
         Style_Gan_Model.driver.find_element_by_xpath("/html/body/div[7]/div[2]/div[1]/colab-tab-layout-container/colab-tab/div/colab-shaded-scroller/div/div[1]/div/div[2]/div[10]/div[2]/div[2]/div[2]/div[2]/div[1]/div/iron-icon[1]").click()
+        Style_Gan_Model.driver.switch_to.window(handle_of_the_window)
+        time.sleep(0.5)
+        runtime_butn = Style_Gan_Model.driver.find_element(By.XPATH,
+                                                           "/html/body/div[7]/div[1]/div/div[2]/div[2]/div[2]/div[2]/div[1]/div[5]/div/div/div[1]")
+        runtime_butn.click()
+        Style_Gan_Model.driver.switch_to.window(handle_of_the_window)
+        time.sleep(0.5)
+        Style_Gan_Model.driver.find_element(By.XPATH, "/html/body/div[13]/div[10]/div").click()
+        Style_Gan_Model.driver.switch_to.window(handle_of_the_window)
+        time.sleep(0.5)
+        while (True):
+            if Style_Gan_Model.check_exists("XPATH", "/html/body/colab-dialog/paper-dialog/div[2]/paper-button[2]"):
+                terminate_btn = Style_Gan_Model.driver.find_element(By.XPATH,
+                                                                    "/html/body/colab-dialog/paper-dialog/div[2]/paper-button[2]")
+                ActionChains(Style_Gan_Model.driver).move_to_element(terminate_btn).perform()
+                ActionChains(Style_Gan_Model.driver).click(terminate_btn).perform()
+                break
         global process2_running;
         Style_Gan_Model.process2_running = False
 
     def store_stylegan2_outputs(self):
+        path = f'C:\\Users\\{USER_NAME}\\Downloads\\AI Images\\content\\results\\00000-generate-images\\'
         if Style_Gan_Model.process2_running == True:
             print("process in progress...")
-        elif os.path.exists('C:\\Users\\SYS\\Downloads\\AI Images\\content\\results\\00000-generate-images\\'):
-            subprocess.Popen(r'explorer /open,"C:\Users\SYS\Downloads\AI Images\content\results\00000-generate-images\"')
+        elif os.path.exists(path):
+            subprocess.Popen(f'explorer /open,{path}')
         else:
-            with zipfile.ZipFile("C:\\Users\\SYS\\Downloads\\stylegan2-Images.zip", 'r') as zip_ref:
-                zip_ref.extractall("C:\\Users\\SYS\\Downloads\\AI images")
+            with zipfile.ZipFile(f"C:\\Users\\{USER_NAME}\\Downloads\\stylegan2-Images.zip", 'r') as zip_ref:
+                zip_ref.extractall(f"C:\\Users\\{USER_NAME}\\Downloads\\AI images")
             time.sleep(2)
-            os.remove("C:\\Users\\SYS\\Downloads\\stylegan2-Images.zip")
-            subprocess.Popen(r'explorer /open,"C:\Users\SYS\Downloads\AI Images\content\results\00000-generate-images\"')
+            os.remove(f"C:\\Users\\{USER_NAME}\\Downloads\\stylegan2-Images.zip")
+            subprocess.Popen(f'explorer /open,{path}')
             Style_Gan_Model.store_style2_output_images(self)
 
     def download_from_gdrive(self):
@@ -476,12 +526,12 @@ class Style_Gan_Model(MainWindow):
         try:
             # Getting images names
             images_name = []
-            for file in glob.glob("C:/Users/SYS/Downloads/AI images/content/stylegan/images/*.png"):
+            for file in glob.glob(f"C:/Users/{USER_NAME}/Downloads/AI images/content/stylegan/images/*.png"):
                 f_name = file.rpartition('\\')[-1]
                 images_name.append(f_name)
 
             # Getting images data from the output folder
-            images = [cv2.imread(file) for file in glob.glob("C:/Users/SYS/Downloads/AI images/content/stylegan/images/*.png")]
+            images = [cv2.imread(file) for file in glob.glob(f"C:/Users/{USER_NAME}/Downloads/AI images/content/stylegan/images/*.png")]
             print(len(images))
 
             # Getting local machine time
@@ -513,12 +563,12 @@ class Style_Gan_Model(MainWindow):
         try:
             # Getting images names
             images_name = []
-            for file in glob.glob("C:/Users/SYS/Downloads/AI images/content/results/00000-generate-images/seed*.png"):
+            for file in glob.glob(f"C:/Users/{USER_NAME}/Downloads/AI images/content/results/00000-generate-images/seed*.png"):
                 f_name = file.rpartition('\\')[-1]
                 images_name.append(f_name)
 
             # Getting images data from the output folder
-            images = [cv2.imread(file) for file in glob.glob("C:/Users/SYS/Downloads/AI images/content/results/00000-generate-images/seed*.png")]
+            images = [cv2.imread(file) for file in glob.glob(f"C:/Users/{USER_NAME}/Downloads/AI images/content/results/00000-generate-images/seed*.png")]
             print(len(images))
 
             # Getting local machine time
