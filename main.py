@@ -101,9 +101,7 @@ WINDOW_SIZE = "1920,1080"
 # Setting Chrome Driver Options
 # ///////////////////////////////////////////////////////////////
 chrome_options = Options()
-prefs = {"profile.default_content_settings.popups": 0,
-                 "download.default_directory": r"C:\Users\SYS\Downloads\AI Images\\",
-                 "directory_upgrade": True}
+prefs = {"profile.default_content_settings.popups": 0,"download.default_directory": r'C:\Users\SYS\Downloads\AI Images',"directory_upgrade": True}
 chrome_options.add_experimental_option("prefs",prefs)
 #chrome_options.add_argument("--headless")
 chrome_options.add_argument("--window-size=%s" % WINDOW_SIZE)
@@ -127,7 +125,7 @@ smtp.login(host_user, app_password)
 server = ei.connect("imap.gmail.com", host_user, app_password)
 confirm_email = server.mail(server.listids()[0])
 uemail = confirm_email.from_addr
-confirm_email.title
+#confirm_email.title
 
 # MAIN WINDOW CLASS
 # ///////////////////////////////////////////////////////////////
@@ -517,7 +515,7 @@ class MainWindow(QMainWindow):
             UIFunctions.theme(self, themeFile, True)
 
             # SET HACKS
-            self.setThemeHack(self)
+            self.setThemeHack()
 
         # SET First PAGE AND SELECT MENU
         # ///////////////////////////////////////////////////////////////
@@ -877,9 +875,9 @@ class MainWindow(QMainWindow):
                 # getting the latest email in the inbox from the system
                 c_mail = ser.mail(ser.listids()[0])
                 # getting the email sender address
-                c_mail.from_addr
+                #c_mail.from_addr
                 # getting the email title
-                c_mail.title
+                #c_mail.title
                 # removing the forget credentials widget from the app display
                 widgets.forget_credentials_widget.lower()
                 # if the mail title is 'NewPassword'
@@ -918,9 +916,9 @@ class MainWindow(QMainWindow):
             # getting the latest email in the inbox from the system
             confirm_mail = serv.mail(serv.listids()[0])
             # getting the email sender address
-            confirm_mail.from_addr
+            #confirm_mail.from_addr
             # getting the email title
-            confirm_mail.title
+            #confirm_mail.title
             # calling the function to update the new user password in the database
             validate_new_password = User_Profile.update_new_password(self, new_password, confirm_new_password, confirm_mail.from_addr)
             # if the wrong new password pattern followed message is returned
@@ -968,7 +966,7 @@ class MainWindow(QMainWindow):
             username = widgets.user_name.text()
 
             # finding the user by the user email
-            user = User_Profile.find_user_by_name(self,username);
+            user = User_Profile.find_user_by_name(self,username)
             # calling the function to load user favourite items stored in the database to display
             User_Profile.load_myfavourites(self, widgets.user_name.text(), widgets)
             # calling the function to load user activity stored in the database to display
@@ -2162,15 +2160,30 @@ class MainWindow(QMainWindow):
         if btnName == "human_thumbnail_btn_2":
             widgets.stackedWidget_model_training.setCurrentWidget(widgets.model_train_options_page)
             widgets.label_224.setPixmap(widgets.human_thumbnail_2.pixmap())
+            self.training_gan_dataset = '"Celebs_dataset"'
 
 
         if btnName == "run_gan_btn":
-            user = widgets.user_name.text()
-            User_Profile.update_recent_activity(self, user, 'Started Training',
-                                                'High', widgets)
-            Gan_Model.train_model(self,widgets)
-            User_Profile.update_recent_activity(self, user, 'Ended Training',
-                                                'High', widgets)
+
+            if Gan_Model.training == False:
+                user = widgets.user_name.text()
+
+                User_Profile.update_recent_activity(self, user, 'Started Training',
+
+                                                    'High', widgets)
+
+                self.dst_gif = QMovie(":/images/images/images/loadingAnimation.gif")
+                self.tick_gif = QMovie(":/images/images/images/tick.gif")
+                self.azure_gif = QMovie(":/images/azure_gif.gif")
+                self.tick = QPixmap(":/images/images/images/tick.png")
+                self.tick_gif.start()
+                self.dst_gif.start()
+                self.azure_gif.start()
+                threading.Thread(target=Gan_Model.train_model, args=[self, widgets]).start()
+                # Showing the model training progress page
+                widgets.stackedWidget_model_training.setCurrentWidget(widgets.model_progress_page)
+            elif Gan_Model.traing == True:
+                widgets.stackedWidget_model_training.setCurrentWidget(widgets.model_progress_page)
 
         if btnName == "change_dst_btn":
             widgets.stackedWidget_model_training.setCurrentWidget(widgets.select_dataset_page)
@@ -2182,7 +2195,121 @@ class MainWindow(QMainWindow):
             widgets.cancel_training_confirm_widget.raise_()
 
         if btnName == "cancel_training_confirm_ok_btn":
+            Gan_Model.training = False
             widgets.stackedWidget_model_training.setCurrentWidget(widgets.select_dataset_page)
+            widgets.status_label.setText(
+                f'<html><head/><body><p align="center"><span style=" font-size:14pt; font-weight:700; font-style:italic;">Compute instance starting....</span></body></html>')
+            widgets.status_label.raise_()
+            widgets.azure_label.raise_()
+            widgets.genrated_images_count.display(0)
+            widgets.hours_2.display(0)
+            widgets.minutes.display(0)
+            widgets.epoch.display(0)
+            widgets.progress_number_3.display(0)
+            widgets.progress_number_4.display(0)
+            self.azure_gif.stop()
+            self.dst_gif.stop()
+            self.tick_gif.stop()
+            time.sleep(2)
+            handle_of_the_window = Gan_Model.driver.current_window_handle
+            Gan_Model.driver.switch_to.window(handle_of_the_window)
+            Gan_Model.driver.find_element(By.XPATH, "/html/body/div[3]/div[3]/div[2]/div/div/div[5]/button[2]").click()
+            time.sleep(2)
+            try:
+                Gan_Model.driver.find_element(By.XPATH,
+                                              "/html/body/div[4]/div/div/div[1]/div[1]/div[3]/div[1]/div[2]/div[2]/div/div[6]/div[1]/div/div/div/div[5]/pre").click()
+
+                i = 0
+                j = 0
+                for i in range(10):
+                    ActionChains(Gan_Model.driver).send_keys(Keys.ARROW_RIGHT).perform()
+                for j in range(30):
+                    ActionChains(Gan_Model.driver).send_keys(Keys.BACKSPACE).perform()
+            except:
+                pass
+            time.sleep(2)
+            try:
+                Gan_Model.driver.find_element(By.XPATH,
+                                              "/html/body/div[4]/div/div/div[1]/div[1]/div[4]/div[1]/div[2]/div[2]/div/div[6]/div[1]/div/div/div/div[5]/pre").click()
+                i = 0
+                j = 0
+                for i in range(10):
+                    ActionChains(Gan_Model.driver).send_keys(Keys.ARROW_RIGHT).perform()
+                for j in range(30):
+                    ActionChains(Gan_Model.driver).send_keys(Keys.BACKSPACE).perform()
+            except:
+                pass
+            time.sleep(2)
+            try:
+                Gan_Model.driver.find_element(By.XPATH, "/html/body/div[3]/div[3]/div[1]/div/div/div/ul/li[5]").click()
+                clrr = Gan_Model.driver.find_element(By.XPATH,
+                                           "/html/body/div[3]/div[3]/div[1]/div/div/div/ul/li[5]/ul/li[11]/a")
+                ActionChains(Gan_Model.driver).move_to_element(clrr).perform()
+                time.sleep(1)
+                clr_btn = Gan_Model.driver.find_element(By.XPATH,
+                                              "/html/body/div[3]/div[3]/div[1]/div/div/div/ul/li[5]/ul/li[11]/ul/li[3]")
+                ActionChains(Gan_Model.driver).move_to_element(clr_btn).perform()
+                time.sleep(1)
+                ActionChains(Gan_Model.driver).click(clr_btn).perform()
+            except:
+                pass
+
+            time.sleep(3)
+            Gan_Model.driver.find_element(By.XPATH, "/html/body/div[3]/div[3]/div[2]/div/div/div[1]/button").click()
+            handle_of_the_window = Gan_Model.driver.current_window_handle
+            Gan_Model.driver.switch_to.window(handle_of_the_window)
+            time.sleep(3)
+            Gan_Model.driver.close()
+            # opening browser on the background
+            # chrome_options.add_argument("--headless")
+
+            # Creating a Chrome driver instance
+            Gan_Model.driver = webdriver.Chrome(executable_path=CHROMEDRIVER_PATH, options=chrome_options)
+            Gan_Model.driver.get("https://ml.azure.com/compute/list?wsid=/subscriptions/1bfb53aa-2de8-4774-be73-30f4dd005819/resourcegroups/Fyp_resource/workspaces/Fyp_machine_learning_workspace&tid=75df096c-8b72-48e4-9b91-cbf79d87ee3a")
+            while (True):
+                try:
+                    email = Gan_Model.driver.find_element(By.XPATH,
+                                                          "/html/body/div/form[1]/div/div/div[2]/div[1]/div/div/div/div/div[1]/div[3]/div/div/div/div[2]/div[2]/div/input[1]")
+                    email.send_keys("SP18-BCS-154@isbstudent.comsats.edu.pk")
+                    break
+                except:
+                    pass
+
+            ActionChains(Gan_Model.driver).send_keys(Keys.RETURN).perform()
+
+            while (True):
+                try:
+                    password = Gan_Model.driver.find_element(By.XPATH,
+                                                             "/html/body/div/form[1]/div/div/div[2]/div[1]/div/div/div/div/div/div[3]/div/div[2]/div/div[3]/div/div[2]/input")
+                    password.send_keys("7310643")
+                    break
+                except:
+                    pass
+
+            ActionChains(Gan_Model.driver).send_keys(Keys.RETURN).perform()
+
+            while (True):
+                try:
+                    Gan_Model.driver.find_element(By.XPATH,
+                                                  "/html/body/div/form/div/div/div[2]/div[1]/div/div/div/div/div/div[3]/div/div[2]/div/div[3]/div[2]/div/div/div[1]/input").click()
+                    break
+                except:
+                    pass
+
+            time.sleep(4)
+            while (True):
+                try:
+                    Gan_Model.driver.find_element(By.XPATH,
+                                                  "/html/body/div/div/div/div[2]/div[2]/main/div/div[3]/div/div/div[2]/div/div/div[3]/div/div/div[2]/div/div[2]/div/div/div/div[2]/div/div/div/div/div/div/div/div[1]").click()
+                    time.sleep(1)
+                    #Gan_Model.driver.find_element(By.XPATH,
+                    #                              "/html/body/div/div/div/div[2]/div[2]/main/div/div[3]/div/div/div[2]/div/div/div[1]/div/div/div/div/div[4]/button").click()
+                    break
+                except:
+                    pass
+            time.sleep(10)
+            Gan_Model.driver.close()
+            widgets.cancel_training_confirm_widget.lower()
 
         if btnName == "cancel_training_confirm_cancel_btn":
             widgets.cancel_training_confirm_widget.lower()
@@ -2199,7 +2326,20 @@ class MainWindow(QMainWindow):
 
 
         if btnName == "view_generated_imgs_btn":
+
+            Gan_Model.store_output_images(self)
             outputs_load_status = Outputs.load_output_images_thumbs(self, widgets)
+            widgets.status_label.setText(
+                f'<html><head/><body><p align="center"><span style=" font-size:14pt; font-weight:700; font-style:italic;">Compute instance starting....</span></body></html>')
+            widgets.status_label.raise_()
+            widgets.azure_label.raise_()
+            widgets.genrated_images_count.display(0)
+            widgets.hours_2.display(0)
+            widgets.minutes.display(0)
+            widgets.epoch.display(0)
+            widgets.progress_number_3.display(0)
+            widgets.progress_number_4.display(0)
+            Gan_Model.training = False
             if outputs_load_status == "output loaded success":
                 widgets.stackedWidget_5.setCurrentWidget(widgets.content_page)
                 username = widgets.user_name.text()
@@ -2213,6 +2353,7 @@ class MainWindow(QMainWindow):
                 widgets.generated_images_stackedWidget.setCurrentWidget(widgets.no_outputs_page)
                 widgets.outputs_thumb_view_btn.hide()
                 widgets.outputs_list_view_btn.hide()
+
 
         if btnName == "make_fav1_btn":
             username = widgets.user_name.text()

@@ -1,6 +1,8 @@
 <RCC>
   <qresource prefix="images">
+    <file>azure_gif.gif</file>
     <file>images/images/trans-content.jpg</file>
+    <file>azicon.png</file>
     <file>images/images/trans-result.png</file>
     <file>images/images/trans-style.jpg</file>
     <file>images/images/arrow.png</file>
