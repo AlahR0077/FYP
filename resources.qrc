@@ -1,8 +1,17 @@
 <RCC>
   <qresource prefix="images">
-    <file>azure_gif.gif</file>
+    <file>images/images/carbon_image-search.png</file>
+    <file>images/images/crop_video.png</file>
+    <file>images/images/export_video.png</file>
+    <file>images/images/flip_video.png</file>
+    <file>images/images/fps_video.png</file>
+    <file>images/images/frames_video.png</file>
+    <file>images/images/icon.png</file>
+    <file>images/images/reverse_video.png</file>
+    <file>images/images/rotate_video.png</file>
+    <file>images/images/azicon.png</file>
+    <file>images/images/azure_gif.gif</file>
     <file>images/images/trans-content.jpg</file>
-    <file>azicon.png</file>
     <file>images/images/trans-result.png</file>
     <file>images/images/trans-style.jpg</file>
     <file>images/images/arrow.png</file>
@@ -27,6 +36,7 @@
     <file>images/images/PyDracula_vertical.png</file>
   </qresource>
   <qresource prefix="icons">
+    <file>images/icons/play_video.png</file>
     <file>images/images/contrast.png</file>
     <file>images/images/crop.png</file>
     <file>images/images/pen.png</file>
