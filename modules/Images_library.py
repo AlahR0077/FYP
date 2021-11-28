@@ -24,23 +24,50 @@ from main import *
 # ///////////////////////////////////////////////////////////////
 class Images_library(MainWindow):
 
-    def scrap_images_from_sites(self):
+    # def scrap_images_from_sites(self):
+    #     pass
+    #
+    # def recommend_images(self):
+    #     pass
+    #
+    # def set_favourite(self):
+    #     pass
+    #
+    # def compare_images(self):
+    #     pass
+    #
+    # def view_library(self):
+    #     pass
+    #
+    # def save_images_to_library(self):
+    #     pass
+    #
+    # def purchase_highclass_images(self):
+    #     pass
+
+    def open_category_image(self):
         pass
 
-    def recommend_images(self):
+    def make_fav_category_image(self):
         pass
 
-    def set_favourite(self):
+    def del_category_image(self):
         pass
 
-    def compare_images(self):
+    def open_search_category_image(self):
         pass
 
-    def view_library(self):
+    def make_fav_search_category_image(self):
         pass
 
-    def save_images_to_library(self):
+    def del_search_category_image(self):
         pass
 
-    def purchase_highclass_images(self):
+    def open_selected_library_image(self):
+        pass
+
+    def select_comparing_image(self):
+        pass
+
+    def save_image_rating(self):
         pass
