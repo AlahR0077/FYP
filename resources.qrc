@@ -1,5 +1,10 @@
 <RCC>
   <qresource prefix="images">
+    <file>images/images/web.png</file>
+    <file>images/images/category.png</file>
+    <file>images/images/compare.png</file>
+    <file>images/images/rate.png</file>
+    <file>images/images/search_video.png</file>
     <file>images/images/carbon_image-search.png</file>
     <file>images/images/crop_video.png</file>
     <file>images/images/export_video.png</file>

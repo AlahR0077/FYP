@@ -81,6 +81,7 @@ from PySide6 import QtGui, QtCore
 from modules import *
 from widgets import *
 
+
 # Set MongoDB Database
 # ///////////////////////////////////////////////////////////////
 client = pymongo.MongoClient()
@@ -374,7 +375,55 @@ class MainWindow(QMainWindow):
         widgets.delete_img_confirm_ok_btn.clicked.connect(self.buttonClick)
         widgets.delete_img_confirm_cancel_btn.clicked.connect(self.buttonClick)
         widgets.fav_added_notification_ok_btn.clicked.connect(self.buttonClick)
-#stylegan widgets
+
+# video customization
+        widgets.generated_videos_btn.clicked.connect(self.buttonClick)
+        widgets.create_video_btn.clicked.connect(self.buttonClick)
+        widgets.select_images_for_video_btn.clicked.connect(self.buttonClick)
+        widgets.make_video_btn.clicked.connect(self.buttonClick)
+        widgets.generated_videos_btn.clicked.connect(self.buttonClick)
+        widgets.select_images_btn.clicked.connect(self.buttonClick)
+        widgets.cancel_selected_images.clicked.connect(self.buttonClick)
+
+        widgets.open_image_for_video_btn.clicked.connect(self.buttonClick)
+        widgets.remove_selected_image_btn.clicked.connect(self.buttonClick)
+        widgets.remove_all_selected_images_btn.clicked.connect(self.buttonClick)
+
+        widgets.flip_video_btn.clicked.connect(self.buttonClick)
+        widgets.change_fps_btn.clicked.connect(self.buttonClick)
+        widgets.reverse_video_btn.clicked.connect(self.buttonClick)
+        widgets.get_frames_btn.clicked.connect(self.buttonClick)
+        widgets.crop_video_btn.clicked.connect(self.buttonClick)
+        widgets.apply_effects_video_btn.clicked.connect(self.buttonClick)
+        widgets.rotate_video_btn.clicked.connect(self.buttonClick)
+        widgets.crop_video_btn.clicked.connect(self.buttonClick)
+        widgets.apply_effects_video_btn.clicked.connect(self.buttonClick)
+        widgets.search_library_images_btn.clicked.connect(self.buttonClick)
+        widgets.search_library_videos_btn.clicked.connect(self.buttonClick)
+        widgets.library_category_btn.clicked.connect(self.buttonClick)
+        widgets.library_rate_btn.clicked.connect(self.buttonClick)
+        widgets.library_compare_btn.clicked.connect(self.buttonClick)
+        widgets.ai_images_web_btn.clicked.connect(self.buttonClick)
+        widgets.human_category_lib_btn.clicked.connect(self.buttonClick)
+        widgets.anime_category_lib_btn.clicked.connect(self.buttonClick)
+        widgets.animal_category_lib_btn.clicked.connect(self.buttonClick)
+        widgets.object_category_lib_btn.clicked.connect(self.buttonClick)
+        widgets.library_compare_btn.clicked.connect(self.buttonClick)
+        widgets.make_fav_image_category_btn.clicked.connect(self.buttonClick)
+        widgets.delete_image_category_btn.clicked.connect(self.buttonClick)
+        widgets.open_search_image_category_btn.clicked.connect(self.buttonClick)
+        widgets.make_fav_search_image_category_btn.clicked.connect(self.buttonClick)
+        widgets.delete_search_image_category_btn.clicked.connect(self.buttonClick)
+        widgets.web_source_1_btn.clicked.connect(self.buttonClick)
+        widgets.web_source_2_btn.clicked.connect(self.buttonClick)
+        widgets.web_source_3_btn.clicked.connect(self.buttonClick)
+        widgets.web_source_4_btn.clicked.connect(self.buttonClick)
+        widgets.open_selected_lib_image_btn.clicked.connect(self.buttonClick)
+        widgets.select_comparing_img_btn.clicked.connect(self.buttonClick)
+        widgets.save_rating_btn.clicked.connect(self.buttonClick)
+        widgets.selected_lib_image_btn.clicked.connect(self.buttonClick)
+
+        #stylegan widgets
         widgets.style_gan_tab_btn.clicked.connect(self.buttonClick)
         widgets.login_google_btn.clicked.connect(self.buttonClick)
         widgets.login_success_ok_btn_2.clicked.connect(self.buttonClick)
@@ -2777,6 +2826,181 @@ class MainWindow(QMainWindow):
                 widgets.selected_image.setPixmap(QtGui.QPixmap(self.resized_image_331))
                 self.customized_image_331 = self.resized_image_331
                 self.customized_image = self.original_image
+
+# video customization button actions
+
+        if btnName == "generated_videos_btn":
+            if loggedIn == False:
+                widgets.stackedWidget_5.setCurrentWidget(widgets.login_first_page)
+            else:
+                widgets.stackedWidget_5.setCurrentWidget(widgets.content_page)
+                widgets.stackedWidget_content_pages.setCurrentWidget(widgets.video_customization)
+
+        if btnName == "create_video_btn":
+            widgets.stackedWidget_video_cutom.setCurrentWidget(widgets.images_for_video)
+
+        if btnName == "reset_changes_video_btn":
+            Video_Customization.reset_changes_to_video(self)
+            pass
+
+        if btnName == "save_changes_video_btn":
+            Video_Customization.save_changes_to_video(self)
+            pass
+
+        if btnName == "back_to_video_custom_btn":
+            if widgets.stackedWidget_video_cutom.currentWidget() == widgets.video_editing:
+                widgets.stackedWidget_video_cutom.setCurrentWidget(widgets.video_custom_home)
+            else:
+                widgets.stackedWidget_video_cutom.setCurrentWidget(widgets.video_editing)
+                #widgets.selected_image.setPixmap(QtGui.QPixmap(self.resized_image_331))
+                #self.customized_image_331 = self.resized_image_331
+                #self.customized_image = self.original_image
+
+        if btnName == "select_images_for_video_btn":
+            Video_Customization.choose_images(self,widgets)
+
+        if btnName == "select_images_btn":
+            widgets.seleted_db_images_widget.lower()
+            Video_Customization.set_selected_images(self, widgets)
+
+        if btnName == "cancel_selected_images":
+            widgets.seleted_db_images_widget.lower()
+
+        if btnName == "open_image_for_video_btn":
+            Video_Customization.open_selected_list_image(self, widgets)
+
+        if btnName == "remove_selected_image_btn":
+            index_list = widgets.tableWidget_selected_images_for_videos.selectionModel().selectedRows()
+            for index in index_list:
+                widgets.tableWidget_selected_images_for_videos.removeRow(index.row())
+
+        if btnName == "remove_all_selected_images_btn":
+            widgets.tableWidget_selected_images_for_videos.setRowCount(0)
+            widgets.no_images_selected.raise_()
+
+        if btnName == "make_video_btn":
+            # write a function that makes a video from selected images
+            Video_Customization.create_video(self,widgets)
+
+        if btnName == "flip_video_btn":
+            # write a function that flips the selected video
+            Video_Customization.flip_video(self)
+            pass
+
+        if btnName == "change_fps_btn":
+            Video_Customization.change_video_fps(self)
+            pass
+
+        if btnName == "reverse_video_btn":
+            Video_Customization.reverse_video(self)
+            pass
+
+        if btnName == "get_frames_btn":
+            Video_Customization.get_frames(self)
+            pass
+
+        if btnName == "crop_video_btn":
+            Video_Customization.crop_video(self)
+            pass
+
+        if btnName == "apply_effects_video_btn":
+            Video_Customization.apply_effects(self)
+            pass
+
+        if btnName == "rotate_video_btn":
+            Video_Customization.rotate_video(self)
+            pass
+
+        if btnName == "export_video_btn":
+            Video_Customization.export_video(self)
+            pass
+
+# images library buttton actions
+
+        if btnName == "search_library_images_btn":
+            widgets.stackedWidget_library.setCurrentWidget(widgets.search_results)
+
+        if btnName == "search_library_videos_btn":
+            widgets.stackedWidget_library.setCurrentWidget(widgets.search_results)
+
+        if btnName == "library_category_btn":
+            widgets.stackedWidget_library.setCurrentWidget(widgets.images_library_category)
+
+        if btnName == "library_rate_btn":
+            widgets.stackedWidget_library.setCurrentWidget(widgets.rate_library_image)
+
+        if btnName == "library_compare_btn":
+            widgets.stackedWidget_library.setCurrentWidget(widgets.compare_images)
+
+        if btnName == "ai_images_web_btn":
+            widgets.stackedWidget_library.setCurrentWidget(widgets.select_sites)
+
+        if btnName == "human_category_lib_btn":
+            widgets.stackedWidget_library.setCurrentWidget(widgets.Category_images)
+
+        if btnName == "anime_category_lib_btn":
+            widgets.stackedWidget_library.setCurrentWidget(widgets.Category_images)
+
+        if btnName == "animal_category_lib_btn":
+            widgets.stackedWidget_library.setCurrentWidget(widgets.Category_images)
+
+        if btnName == "object_category_lib_btn":
+            widgets.stackedWidget_library.setCurrentWidget(widgets.Category_images)
+
+        if btnName == "open_image_category_btn":
+            Images_library.open_category_image(self)
+            pass
+
+        if btnName == "make_fav_image_category_btn":
+            Images_library.make_fav_category_image(self)
+            pass
+
+        if btnName == "delete_image_category_btn":
+            Images_library.del_category_image(self)
+            pass
+
+        if btnName == "open_search_image_category_btn":
+            Images_library.open_search_category_image(self)
+            pass
+
+        if btnName == "make_fav_search_image_category_btn":
+            Images_library.make_fav_search_category_image(self)
+            pass
+
+        if btnName == "delete_search_image_category_btn":
+            Images_library.del_search_category_image(self)
+            pass
+
+        if btnName == "web_source_1_btn":
+            # source page
+            pass
+
+        if btnName == "web_source_2_btn":
+            # source page
+            pass
+
+        if btnName == "web_source_3_btn":
+            # source page
+            pass
+
+        if btnName == "web_source_4_btn":
+            # source page
+            pass
+
+        if btnName == "open_selected_lib_image_btn":
+            Images_library.open_selected_library_image(self)
+            pass
+
+        if btnName == "select_comparing_img_btn":
+            Images_library.select_comparing_image(self)
+            pass
+
+        if btnName == "selected_lib_image_btn":
+            Images_library.open_selected_library_image(self)
+
+        if btnName == "save_rating_btn":
+            Images_library.save_image_rating(self)
+            pass
 
         # Print Pressed Button
         print(f'Button "{btnName}" pressed!')
